@@ -31,6 +31,7 @@ public class XMIViewer extends JFrame {
 	IOException, UIMAException {
 		super("UIMA XMI Viewer");
 
+		// window events
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -39,6 +40,7 @@ public class XMIViewer extends JFrame {
 			}
 		});
 
+		// load type system and CAS
 		TypeSystemDescription tsd;
 		CAS cas = null;
 		if (files.length >= 1) {
@@ -55,6 +57,7 @@ public class XMIViewer extends JFrame {
 			cas = jcas.getCas();
 		}
 
+		// assembly of the main view
 		CasAnnotationViewer viewer = new CasAnnotationViewer();
 		viewer.setCAS(cas);
 		getContentPane().add(viewer);
