@@ -4,7 +4,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.swing.JFrame;
@@ -27,8 +26,7 @@ public class XMIViewer extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	public XMIViewer(File... files) throws FileNotFoundException, SAXException,
-	IOException, UIMAException {
+	public XMIViewer(File file) {
 		super("UIMA XMI Viewer");
 
 		// window events
@@ -43,19 +41,31 @@ public class XMIViewer extends JFrame {
 		// load type system and CAS
 		TypeSystemDescription tsd;
 		CAS cas = null;
-		if (files.length >= 1) {
-			File file = files[0];
-			File dir = file.getParentFile();
-			File tsdFile = new File(dir, "typesystem.xml");
-			tsd =
-					TypeSystemDescriptionFactory
-							.createTypeSystemDescriptionFromPath(tsdFile
-									.toURI().toString());
-			JCas jcas = JCasFactory.createJCas(tsd);
+
+		File dir = file.getParentFile();
+		File tsdFile = new File(dir, "typesystem.xml");
+		tsd =
+				TypeSystemDescriptionFactory
+						.createTypeSystemDescriptionFromPath(tsdFile.toURI()
+								.toString());
+		JCas jcas = null;
+		try {
+			jcas = JCasFactory.createJCas(tsd);
+		} catch (UIMAException e1) {
+			e1.printStackTrace();
+			System.exit(1);
+		}
+		try {
 			XmiCasDeserializer.deserialize(new FileInputStream(file),
 					jcas.getCas(), true);
-			cas = jcas.getCas();
+		} catch (SAXException e1) {
+			e1.printStackTrace();
+			System.exit(1);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			System.exit(1);
 		}
+		cas = jcas.getCas();
 
 		// assembly of the main view
 		CasAnnotationViewer viewer = new CasAnnotationViewer();
@@ -66,29 +76,20 @@ public class XMIViewer extends JFrame {
 
 	}
 
-	public static void main(String[] args) throws FileNotFoundException,
-			UIMAException, SAXException, IOException {
+	public static void main(String[] args) {
+
+		// we want to open files by open-clicking in Finder & co.
+		// not tested yet
+		// source:
+		// http://stackoverflow.com/questions/1575190/double-click-document-file-in-mac-os-x-to-open-java-application
 		if (System.getProperty("os.name").contains("OS X")) {
 			Application a = Application.getApplication();
 			a.setOpenFileHandler(new OpenFilesHandler() {
 
 				public void openFiles(OpenFilesEvent e) {
 					for (File file : e.getFiles()) {
-						try {
-							new XMIViewer(file);
-						} catch (FileNotFoundException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						} catch (UIMAException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						} catch (SAXException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
+						new XMIViewer(file);
+
 					}
 				}
 
