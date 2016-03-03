@@ -16,12 +16,25 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>sh.tak.appbundler</groupId>
 				<artifactId>appbundle-maven-plugin</artifactId>
 				<version>1.0.4</version>
 				<configuration>
 					<mainClass>de.unistuttgart.ims.annotationviewer.XMIViewer</mainClass>
 					<dictionaryFile>MyInfo.plist</dictionaryFile>
+					<jvmOptions>-XstartOnFirstThread</jvmOptions>
 				</configuration>
 				<executions>
 					<execution>

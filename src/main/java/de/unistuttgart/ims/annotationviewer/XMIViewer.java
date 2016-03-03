@@ -3,8 +3,6 @@ package de.unistuttgart.ims.annotationviewer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CAS;
@@ -14,12 +12,12 @@ import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -34,27 +32,12 @@ import com.apple.eawt.OpenFilesHandler;
 
 public class XMIViewer {
 
-	private static final String HELP_MESSAGE =
-			"Instructions for using Xmi Viewer";
-
-	// private Shell shell;
 	static boolean createdScreenBar = false;
-
-	Map<String, Shell> openWindows = new HashMap<String, Shell>();
-
-	public XMIViewer() {
-
-	}
 
 	protected void loadFile(Shell shell, File file) {
 
 		shell.setLayout(new FillLayout());
-		shell.addShellListener(new ShellAdapter() {
-			@Override
-			public void shellClosed(ShellEvent e) {
-				// e.doit = closeAddressBook();
-			}
-		});
+
 		// load type system and CAS
 		TypeSystemDescription tsd;
 		CAS cas = null;
@@ -82,7 +65,7 @@ public class XMIViewer {
 			System.exit(1);
 		}
 		cas = jcas.getCas();
-		SWTCasAnnotationViewer viewer = new SWTCasAnnotationViewer(cas, shell);
+		new SWTCasAnnotationViewer(cas, shell);
 
 		shell.setText(file.getName());
 		shell.open();
@@ -92,8 +75,8 @@ public class XMIViewer {
 	public static void main(String[] args) {
 		System.setProperty("com.apple.macos.useScreenMenuBar", "true");
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
+		Display display = new Display();
 
-		final Display display = new Display();
 		final XMIViewer app = new XMIViewer();
 		final Shell shell = app.open(display);
 		while (!shell.isDisposed()) {
@@ -101,13 +84,14 @@ public class XMIViewer {
 				display.sleep();
 			}
 		} // we want to open files by open-clicking in Finder & co.
-		  // not tested yet
-		  // source:
-		  // http://stackoverflow.com/questions/1575190/double-click-document-file-in-mac-os-x-to-open-java-application
+		// not tested yet
+		// source:
+		// http://stackoverflow.com/questions/1575190/double-click-document-file-in-mac-os-x-to-open-java-application
 		if (System.getProperty("os.name").contains("OS X")) {
 			Application a = Application.getApplication();
 			a.setOpenFileHandler(new OpenFilesHandler() {
 
+				@Override
 				public void openFiles(OpenFilesEvent e) {
 
 					for (Object file : e.getFiles()) {
@@ -122,13 +106,33 @@ public class XMIViewer {
 		// if (args.length == 1) new XMIViewer(new File(args[0]));
 	}
 
-	private Shell open(Display display) {
-
-		Shell shell = new Shell(display);
-
+	private Shell createShell() {
+		final Shell shell = new Shell(SWT.SHELL_TRIM);
 		createMenuBar(shell);
 
+		shell.addDisposeListener(new DisposeListener() {
+
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				Display d = Display.getCurrent();
+				Menu bar = d.getMenuBar();
+				boolean hasAppMenuBar = (bar != null);
+				if (!hasAppMenuBar) {
+					shell.getMenuBar().dispose();
+					Shell[] shells = d.getShells();
+					if ((shells.length == 1) && (shells[0] == shell)) {
+						if (!d.isDisposed()) d.dispose();
+					}
+				}
+			}
+		});
+
 		return shell;
+	}
+
+	private Shell open(Display display) {
+
+		return createShell();
 	}
 
 	private Menu createMenuBar(Shell shell) {
@@ -146,6 +150,7 @@ public class XMIViewer {
 			// createSearchMenu(menuBar);
 			// createHelpMenu(menuBar);
 		}
+		createdScreenBar = true;
 		return bar;
 	}
 
@@ -170,7 +175,6 @@ public class XMIViewer {
 				String name = dialog.open();
 				if (name == null) return;
 				loadFile(sh, new File(name));
-				openWindows.put(name, sh);
 			}
 		});
 
@@ -184,7 +188,6 @@ public class XMIViewer {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Shell shell = Display.getCurrent().getActiveShell();
-				openWindows.remove(shell.getText());
 				shell.close();
 			}
 		});
