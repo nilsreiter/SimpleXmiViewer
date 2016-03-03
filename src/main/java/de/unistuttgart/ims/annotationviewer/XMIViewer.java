@@ -52,7 +52,7 @@ public class XMIViewer extends JFrame {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			System.err
-			.println("Could not set look and feel: " + e.getMessage());
+					.println("Could not set look and feel: " + e.getMessage());
 		}
 
 		// create about dialog
@@ -91,11 +91,11 @@ public class XMIViewer extends JFrame {
 		closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
-		fileMenu.add(openMenuItem);
-		fileMenu.addSeparator();
-		fileMenu.add(closeMenuItem);
+		// fileMenu.add(openMenuItem);
 		// fileMenu.addSeparator();
-		// fileMenu.add(exitMenuItem);
+		fileMenu.add(closeMenuItem);
+		fileMenu.addSeparator();
+		fileMenu.add(exitMenuItem);
 		helpMenu.add(aboutMenuItem);
 		helpMenu.add(helpMenuItem);
 		menuBar.add(fileMenu);
@@ -125,6 +125,7 @@ public class XMIViewer extends JFrame {
 			public void actionPerformed(ActionEvent ae) {
 				// savePreferences();
 				XMIViewer.this.dispose();
+				System.exit(0);
 			}
 		});
 
@@ -152,9 +153,7 @@ public class XMIViewer extends JFrame {
 						"Annotation Viewer Help", JOptionPane.PLAIN_MESSAGE);
 			}
 		});
-		pack();
-		setVisible(true);
-		// loadFile(file);
+		loadFile(file);
 	}
 
 	protected void loadFile(File file) {
@@ -165,8 +164,8 @@ public class XMIViewer extends JFrame {
 		File tsdFile = new File(dir, "typesystem.xml");
 		tsd =
 				TypeSystemDescriptionFactory
-				.createTypeSystemDescriptionFromPath(tsdFile.toURI()
-						.toString());
+						.createTypeSystemDescriptionFromPath(tsdFile.toURI()
+								.toString());
 		JCas jcas = null;
 		try {
 			jcas = JCasFactory.createJCas(tsd);
@@ -189,7 +188,6 @@ public class XMIViewer extends JFrame {
 		// assembly of the main view
 		CasAnnotationViewer viewer = new CasAnnotationViewer();
 		viewer.setCAS(cas);
-
 		getContentPane().add(viewer);
 		pack();
 		setVisible(true);
@@ -207,6 +205,7 @@ public class XMIViewer extends JFrame {
 			a.setOpenFileHandler(new OpenFilesHandler() {
 
 				public void openFiles(OpenFilesEvent e) {
+
 					for (Object file : e.getFiles()) {
 						if (file instanceof File) new XMIViewer((File) file);
 					}
