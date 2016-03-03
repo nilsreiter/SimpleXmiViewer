@@ -82,7 +82,6 @@ public class XMIViewer {
 			Application a = Application.getApplication();
 			a.setOpenFileHandler(new OpenFilesHandler() {
 
-				@Override
 				public void openFiles(OpenFilesEvent e) {
 
 					for (Object file : e.getFiles()) {
@@ -114,7 +113,6 @@ public class XMIViewer {
 
 		shell.addDisposeListener(new DisposeListener() {
 
-			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				Display d = Display.getCurrent();
 				Menu bar = d.getMenuBar();
