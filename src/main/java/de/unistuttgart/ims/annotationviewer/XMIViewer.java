@@ -1,25 +1,10 @@
 package de.unistuttgart.ims.annotationviewer;
 
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
-import javax.swing.UIManager;
-import javax.swing.filechooser.FileFilter;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CAS;
@@ -28,135 +13,48 @@ import org.apache.uima.fit.factory.JCasFactory;
 import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
-import org.apache.uima.tools.util.gui.AboutDialog;
-import org.apache.uima.tools.viewer.CasAnnotationViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 import org.xml.sax.SAXException;
 
 import com.apple.eawt.AppEvent.OpenFilesEvent;
 import com.apple.eawt.Application;
 import com.apple.eawt.OpenFilesHandler;
 
-public class XMIViewer extends JFrame {
+public class XMIViewer {
 
 	private static final String HELP_MESSAGE =
 			"Instructions for using Xmi Viewer";
 
-	private static final long serialVersionUID = 1L;
-	private JDialog aboutDialog;
-	private JFileChooser openDialog;
+	// private Shell shell;
+	static boolean createdScreenBar = false;
 
-	public XMIViewer(File file) {
-		super(file.getName());
+	Map<String, Shell> openWindows = new HashMap<String, Shell>();
 
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
-			System.err
-					.println("Could not set look and feel: " + e.getMessage());
-		}
+	public XMIViewer() {
 
-		// create about dialog
-		aboutDialog = new AboutDialog(this, "About Annotation Viewer");
-
-		// create file chooser dialog
-		openDialog = new JFileChooser();
-		openDialog.setCurrentDirectory(file.getParentFile());
-		openDialog.setFileFilter(new FileFilter() {
-
-			@Override
-			public boolean accept(File f) {
-				return f.isDirectory() || f.getName().endsWith(".xmi");
-			}
-
-			@Override
-			public String getDescription() {
-				return "UIMA Xmi Files";
-			}
-		});
-
-		// Create Menu Bar
-		JMenuBar menuBar = new JMenuBar();
-
-		JMenu fileMenu = new JMenu("File");
-		JMenu helpMenu = new JMenu("Help");
-
-		// Menu Items
-		JMenuItem aboutMenuItem = new JMenuItem("About");
-		JMenuItem helpMenuItem = new JMenuItem("Help");
-		JMenuItem exitMenuItem = new JMenuItem("Quit");
-		JMenuItem openMenuItem = new JMenuItem("Open...");
-		openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-		JMenuItem closeMenuItem = new JMenuItem("Close");
-		closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-
-		// fileMenu.add(openMenuItem);
-		// fileMenu.addSeparator();
-		fileMenu.add(closeMenuItem);
-		fileMenu.addSeparator();
-		fileMenu.add(exitMenuItem);
-		helpMenu.add(aboutMenuItem);
-		helpMenu.add(helpMenuItem);
-		menuBar.add(fileMenu);
-		menuBar.add(helpMenu);
-
-		setJMenuBar(menuBar);
-
-		// window events
-		this.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				// this.savePreferences();
-				XMIViewer.this.dispose();
-			}
-		});
-
-		// Event Handlling of "Exit" Menu Item
-		exitMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				// savePreferences();
-				System.exit(0);
-			}
-		});
-
-		// Event Handlling of "Close" Menu Item
-		closeMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				// savePreferences();
-				XMIViewer.this.dispose();
-				System.exit(0);
-			}
-		});
-
-		// Event Handlling of "Open" Menu Item
-		openMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				int r = openDialog.showOpenDialog(XMIViewer.this);
-				if (r == JFileChooser.APPROVE_OPTION) {
-					new XMIViewer(openDialog.getSelectedFile());
-				}
-			}
-		});
-
-		// Event Handlling of "About" Menu Item
-		aboutMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				aboutDialog.setVisible(true);
-			}
-		});
-
-		// Event Handlling of "Help" Menu Item
-		helpMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				JOptionPane.showMessageDialog(XMIViewer.this, HELP_MESSAGE,
-						"Annotation Viewer Help", JOptionPane.PLAIN_MESSAGE);
-			}
-		});
-		loadFile(file);
 	}
 
-	protected void loadFile(File file) {
+	protected void loadFile(Shell shell, File file) {
+
+		shell.setLayout(new FillLayout());
+		shell.addShellListener(new ShellAdapter() {
+			@Override
+			public void shellClosed(ShellEvent e) {
+				// e.doit = closeAddressBook();
+			}
+		});
 		// load type system and CAS
 		TypeSystemDescription tsd;
 		CAS cas = null;
@@ -184,22 +82,28 @@ public class XMIViewer extends JFrame {
 			System.exit(1);
 		}
 		cas = jcas.getCas();
+		SWTCasAnnotationViewer viewer = new SWTCasAnnotationViewer(cas, shell);
 
-		// assembly of the main view
-		CasAnnotationViewer viewer = new CasAnnotationViewer();
-		viewer.setCAS(cas);
-		getContentPane().add(viewer);
-		pack();
-		setVisible(true);
+		shell.setText(file.getName());
+		shell.open();
+
 	}
 
 	public static void main(String[] args) {
 		System.setProperty("com.apple.macos.useScreenMenuBar", "true");
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
-		// we want to open files by open-clicking in Finder & co.
-		// not tested yet
-		// source:
-		// http://stackoverflow.com/questions/1575190/double-click-document-file-in-mac-os-x-to-open-java-application
+
+		final Display display = new Display();
+		final XMIViewer app = new XMIViewer();
+		final Shell shell = app.open(display);
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch()) {
+				display.sleep();
+			}
+		} // we want to open files by open-clicking in Finder & co.
+		  // not tested yet
+		  // source:
+		  // http://stackoverflow.com/questions/1575190/double-click-document-file-in-mac-os-x-to-open-java-application
 		if (System.getProperty("os.name").contains("OS X")) {
 			Application a = Application.getApplication();
 			a.setOpenFileHandler(new OpenFilesHandler() {
@@ -207,12 +111,119 @@ public class XMIViewer extends JFrame {
 				public void openFiles(OpenFilesEvent e) {
 
 					for (Object file : e.getFiles()) {
-						if (file instanceof File) new XMIViewer((File) file);
+						if (file instanceof File)
+							app.loadFile(shell, (File) file);
 					}
 				}
 
 			});
 		}
-		if (args.length == 1) new XMIViewer(new File(args[0]));
+
+		// if (args.length == 1) new XMIViewer(new File(args[0]));
+	}
+
+	private Shell open(Display display) {
+
+		Shell shell = new Shell(display);
+
+		createMenuBar(shell);
+
+		return shell;
+	}
+
+	private Menu createMenuBar(Shell shell) {
+		Menu bar = Display.getCurrent().getMenuBar();
+		boolean hasAppMenuBar = (bar != null);
+		if (bar == null) {
+			bar = new Menu(shell, SWT.BAR);
+		}
+		// Menu menuBar = new Menu(shell, SWT.BAR);
+		// shell.setMenuBar(menuBar);
+		if (!createdScreenBar || !hasAppMenuBar) {
+			// create each header and subMenu for the menuBar
+			createFileMenu(bar);
+			// createEditMenu(menuBar);
+			// createSearchMenu(menuBar);
+			// createHelpMenu(menuBar);
+		}
+		return bar;
+	}
+
+	private void createFileMenu(Menu menuBar) {
+		// File menu.
+		MenuItem item = new MenuItem(menuBar, SWT.CASCADE);
+		item.setText("File");
+		Menu menu = new Menu(item);
+		item.setMenu(menu);
+
+		// File -> Open
+		MenuItem subItem = new MenuItem(menu, SWT.NONE);
+		subItem.setText("Open ...");
+		subItem.setAccelerator(SWT.MOD1 + 'O');
+		subItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Shell sh = new Shell(Display.getCurrent());
+				FileDialog dialog = new FileDialog(sh, SWT.OPEN);
+				dialog.setFilterNames(new String[] { "Xmi Files" }); //$NON-NLS-1$
+				dialog.setFilterExtensions(new String[] { "*.xmi" }); //$NON-NLS-1$
+				String name = dialog.open();
+				if (name == null) return;
+				loadFile(sh, new File(name));
+				openWindows.put(name, sh);
+			}
+		});
+
+		new MenuItem(menu, SWT.SEPARATOR);
+
+		// File -> Close.
+		subItem = new MenuItem(menu, SWT.NONE);
+		subItem.setText("Close");
+		subItem.setAccelerator(SWT.MOD1 + 'W');
+		subItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Shell shell = Display.getCurrent().getActiveShell();
+				openWindows.remove(shell.getText());
+				shell.close();
+			}
+		});
+
+		/**
+		 * Adds a listener to handle enabling and disabling
+		 * some items in the Edit submenu.
+		 */
+		menu.addMenuListener(new MenuAdapter() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				Menu menu = (Menu) e.widget;
+				MenuItem[] items = menu.getItems();
+				items[1].setEnabled(Display.getCurrent().getShells().length > 0); // edit
+				// contact
+				// items[5].setEnabled((file != null) && isModified); // save
+				// items[6].setEnabled(table.getItemCount() != 0); // save as
+			}
+		});
+
+		// Windows menu.
+		/*
+		 * item = new MenuItem(menuBar, SWT.CASCADE);
+		 * item.setText("Windows");
+		 * menu = new Menu(item);
+		 * item.setMenu(menu);
+		 * menu.addMenuListener(new MenuAdapter() {
+		 * 
+		 * @Override
+		 * public void menuShown(MenuEvent e) {
+		 * Menu menu = (Menu) e.widget;
+		 * for (Shell shell : Display.getCurrent().getShells()) {
+		 * MenuItem mi = new MenuItem(menu, SWT.NONE);
+		 * mi.setText(shell.getText());
+		 * // mi.setAccelerator(SWT.MOD1 + '');
+		 * }
+		 * }
+		 * });
+		 */
+
 	}
 }
