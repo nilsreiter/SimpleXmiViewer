@@ -207,8 +207,8 @@ public class XMIViewer extends JFrame {
 			a.setOpenFileHandler(new OpenFilesHandler() {
 
 				public void openFiles(OpenFilesEvent e) {
-					for (File file : e.getFiles()) {
-						new XMIViewer(file);
+					for (Object file : e.getFiles()) {
+						if (file instanceof File) new XMIViewer((File) file);
 
 					}
 				}
