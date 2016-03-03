@@ -45,8 +45,8 @@ public class XMIViewer {
 		File tsdFile = new File(dir, "typesystem.xml");
 		tsd =
 				TypeSystemDescriptionFactory
-						.createTypeSystemDescriptionFromPath(tsdFile.toURI()
-								.toString());
+				.createTypeSystemDescriptionFromPath(tsdFile.toURI()
+						.toString());
 		JCas jcas = null;
 		try {
 			jcas = JCasFactory.createJCas(tsd);
@@ -78,15 +78,6 @@ public class XMIViewer {
 		Display display = new Display();
 
 		final XMIViewer app = new XMIViewer();
-		final Shell shell = app.open(display);
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				display.sleep();
-			}
-		} // we want to open files by open-clicking in Finder & co.
-		// not tested yet
-		// source:
-		// http://stackoverflow.com/questions/1575190/double-click-document-file-in-mac-os-x-to-open-java-application
 		if (System.getProperty("os.name").contains("OS X")) {
 			Application a = Application.getApplication();
 			a.setOpenFileHandler(new OpenFilesHandler() {
@@ -95,18 +86,29 @@ public class XMIViewer {
 				public void openFiles(OpenFilesEvent e) {
 
 					for (Object file : e.getFiles()) {
-						if (file instanceof File)
-							app.loadFile(shell, (File) file);
+						if (file instanceof File) {
+							Shell sh = app.createShell();
+							app.loadFile(sh, (File) file);
+						}
 					}
 				}
 
 			});
 		}
+		Shell shell = app.open(display);
 
-		// if (args.length == 1) new XMIViewer(new File(args[0]));
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch()) {
+				display.sleep();
+			}
+		} // we want to open files by open-clicking in Finder & co.
+		  // not tested yet
+		  // source:
+		  // http://stackoverflow.com/questions/1575190/double-click-document-file-in-mac-os-x-to-open-java-application
+
 	}
 
-	private Shell createShell() {
+	Shell createShell() {
 		final Shell shell = new Shell(SWT.SHELL_TRIM);
 		createMenuBar(shell);
 
