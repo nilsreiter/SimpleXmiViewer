@@ -1,12 +1,25 @@
 package de.unistuttgart.ims.annotationviewer;
 
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
+import javax.swing.UIManager;
+import javax.swing.filechooser.FileFilter;
 
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CAS;
@@ -15,6 +28,7 @@ import org.apache.uima.fit.factory.JCasFactory;
 import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
+import org.apache.uima.tools.util.gui.AboutDialog;
 import org.apache.uima.tools.viewer.CasAnnotationViewer;
 import org.xml.sax.SAXException;
 
@@ -24,24 +38,129 @@ import com.apple.eawt.OpenFilesHandler;
 
 public class XMIViewer extends JFrame {
 
+	private static final String HELP_MESSAGE =
+			"Instructions for using Xmi Viewer";
+
 	private static final long serialVersionUID = 1L;
+	private JDialog aboutDialog;
+	private JFileChooser openDialog;
 
 	public XMIViewer(File file) {
-		super("UIMA XMI Viewer");
+		super(file.getName());
+
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			System.err
+					.println("Could not set look and feel: " + e.getMessage());
+		}
+
+		// create about dialog
+		aboutDialog = new AboutDialog(this, "About Annotation Viewer");
+
+		// create file chooser dialog
+		openDialog = new JFileChooser();
+		openDialog.setCurrentDirectory(file.getParentFile());
+		openDialog.setFileFilter(new FileFilter() {
+
+			@Override
+			public boolean accept(File f) {
+				return f.isDirectory() || f.getName().endsWith(".xmi");
+			}
+
+			@Override
+			public String getDescription() {
+				return "UIMA Xmi Files";
+			}
+		});
+
+		// Create Menu Bar
+		JMenuBar menuBar = new JMenuBar();
+
+		JMenu fileMenu = new JMenu("File");
+		JMenu helpMenu = new JMenu("Help");
+
+		// Menu Items
+		JMenuItem aboutMenuItem = new JMenuItem("About");
+		JMenuItem helpMenuItem = new JMenuItem("Help");
+		JMenuItem exitMenuItem = new JMenuItem("Quit");
+		JMenuItem openMenuItem = new JMenuItem("Open...");
+		openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		JMenuItem closeMenuItem = new JMenuItem("Close");
+		closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+
+		fileMenu.add(openMenuItem);
+		fileMenu.addSeparator();
+		fileMenu.add(closeMenuItem);
+		// fileMenu.addSeparator();
+		// fileMenu.add(exitMenuItem);
+		helpMenu.add(aboutMenuItem);
+		helpMenu.add(helpMenuItem);
+		menuBar.add(fileMenu);
+		menuBar.add(helpMenu);
+
+		setJMenuBar(menuBar);
 
 		// window events
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				// this.savePreferences();
+				XMIViewer.this.dispose();
+			}
+		});
+
+		// Event Handlling of "Exit" Menu Item
+		exitMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				// savePreferences();
 				System.exit(0);
 			}
 		});
 
+		// Event Handlling of "Close" Menu Item
+		closeMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				// savePreferences();
+				XMIViewer.this.dispose();
+			}
+		});
+
+		// Event Handlling of "Open" Menu Item
+		openMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				int r = openDialog.showOpenDialog(XMIViewer.this);
+				if (r == JFileChooser.APPROVE_OPTION) {
+					new XMIViewer(openDialog.getSelectedFile());
+				}
+			}
+		});
+
+		// Event Handlling of "About" Menu Item
+		aboutMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				aboutDialog.setVisible(true);
+			}
+		});
+
+		// Event Handlling of "Help" Menu Item
+		helpMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				JOptionPane.showMessageDialog(XMIViewer.this, HELP_MESSAGE,
+						"Annotation Viewer Help", JOptionPane.PLAIN_MESSAGE);
+			}
+		});
+		pack();
+		setVisible(true);
+		// loadFile(file);
+	}
+
+	protected void loadFile(File file) {
 		// load type system and CAS
 		TypeSystemDescription tsd;
 		CAS cas = null;
-
 		File dir = file.getParentFile();
 		File tsdFile = new File(dir, "typesystem.xml");
 		tsd =
@@ -70,14 +189,15 @@ public class XMIViewer extends JFrame {
 		// assembly of the main view
 		CasAnnotationViewer viewer = new CasAnnotationViewer();
 		viewer.setCAS(cas);
+
 		getContentPane().add(viewer);
 		pack();
 		setVisible(true);
-
 	}
 
 	public static void main(String[] args) {
-
+		System.setProperty("com.apple.macos.useScreenMenuBar", "true");
+		System.setProperty("apple.laf.useScreenMenuBar", "true");
 		// we want to open files by open-clicking in Finder & co.
 		// not tested yet
 		// source:
