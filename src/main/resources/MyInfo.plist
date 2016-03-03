@@ -7,10 +7,10 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.data</string>
+				<string>public.xml</string>
 			</array>
 			<key>UTTypeIdentifier</key>
-			<string>com.myurl.myapp.myextension</string>
+			<string>org.apache.uima.xmi</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -20,79 +20,62 @@
 			</dict>
 		</dict>
 	</array>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>JavaAppLauncher</string>
-	<key>CFBundleIconFile</key>
-	<string>GenericJavaApp.icns</string>
-	<key>CFBundleIdentifier</key>
-	<string>de.unistuttgart.ims.annotationviewer.XMIViewer</string>
-	<key>CFBundleDisplayName</key>
-	<string>SimpleXmiViewer</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>SimpleXmiViewer</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>0.1-SNAPSHOT</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>1</string>
-	<key>NSHumanReadableCopyright</key>
-	<string></string>
-	<key>NSHighResolutionCapable</key>
-	<true/>
-	<key>JVMRuntime</key>
-	<string></string>
-	<key>JVMMainClassName</key>
-	<string>de.unistuttgart.ims.annotationviewer.XMIViewer</string>
-	<key>JVMClassPaths</key>
-	<array>
-		<string>de/unistuttgart/ims/annotationviewer/0.0.1-SNAPSHOT/annotationviewer-0.0.1-SNAPSHOT.jar</string>
-		<string>org/apache/uima/uimaj-tools/2.8.1/uimaj-tools-2.8.1.jar</string>
-		<string>org/apache/uima/uimaj-core/2.8.1/uimaj-core-2.8.1.jar</string>
-		<string>org/apache/uima/uimaj-cpe/2.8.1/uimaj-cpe-2.8.1.jar</string>
-		<string>org/apache/uima/uimaj-adapter-vinci/2.8.1/uimaj-adapter-vinci-2.8.1.jar</string>
-		<string>org/apache/uima/jVinci/2.8.1/jVinci-2.8.1.jar</string>
-		<string>org/apache/uima/uimafit-core/2.1.0/uimafit-core-2.1.0.jar</string>
-		<string>commons-lang/commons-lang/2.6/commons-lang-2.6.jar</string>
-		<string>commons-io/commons-io/2.2/commons-io-2.2.jar</string>
-		<string>commons-logging/commons-logging-api/1.1/commons-logging-api-1.1.jar</string>
-		<string>org/springframework/spring-core/3.1.2.RELEASE/spring-core-3.1.2.RELEASE.jar</string>
-		<string>org/springframework/spring-asm/3.1.2.RELEASE/spring-asm-3.1.2.RELEASE.jar</string>
-		<string>commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar</string>
-		<string>org/springframework/spring-context/3.1.2.RELEASE/spring-context-3.1.2.RELEASE.jar</string>
-		<string>org/springframework/spring-aop/3.1.2.RELEASE/spring-aop-3.1.2.RELEASE.jar</string>
-		<string>aopalliance/aopalliance/1.0/aopalliance-1.0.jar</string>
-		<string>org/springframework/spring-expression/3.1.2.RELEASE/spring-expression-3.1.2.RELEASE.jar</string>
-		<string>org/springframework/spring-beans/3.1.2.RELEASE/spring-beans-3.1.2.RELEASE.jar</string>
-	</array>
-	<key>JVMVersion</key>
-	<string>1.6+</string>
-	<key>JVMOptions</key>
-	<array>
-		<string>-Xdock:name=SimpleXmiViewer</string>
-	</array>
-	<key>JVMArguments</key>
-	<array/>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
+    <key>CFBundleExecutable</key>
+    <string>${cfBundleExecutable}</string>
+    <key>CFBundleIconFile</key>
+    <string>${iconFile}</string>
+    <key>CFBundleIdentifier</key>
+    <string>${mainClass}</string>
+    <key>CFBundleDisplayName</key>
+    <string>${bundleName}</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>${bundleName}</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>${version}</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>NSHumanReadableCopyright</key>
+    <string></string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSSupportsAutomaticGraphicsSwitching</key>
+    <true/>
+    <key>JVMRuntime</key>
+    <string>${jrePath}</string>
+    <key>JVMMainClassName</key>
+    <string>${mainClass}</string>
+    <key>JVMClassPaths</key>
+    ${classpath}
+    <key>JVMVersion</key>
+    <string>${jvmVersion}</string>
+    <key>JVMOptions</key>
+    ${jvmOptions}
+    <key>JVMArguments</key>
+    <array/>
+    <key>LauncherWorkingDirectory</key>
+    <string>${workingDirectory}</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleTypeName</key>
 			<string>Xmi File</string>
 			<key>LSHandlerRank</key>
-			<string>Default</string>
+			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.myurl.myapp.myextension</string>
+				<string>org.apache.uima.xmi</string>
 			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
 		</dict>
 	</array>
-	<key>LauncherWorkingDirectory</key>
-	<string>$APP_ROOT</string>
 </dict>
 </plist>
