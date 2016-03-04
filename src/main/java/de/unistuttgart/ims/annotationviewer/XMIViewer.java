@@ -34,7 +34,21 @@ public class XMIViewer {
 
 	static boolean createdScreenBar = false;
 
+	Menu recentMenu;
+
 	protected void loadFile(Shell shell, File file) {
+
+		MenuItem mi = new MenuItem(recentMenu, SWT.LEFT_TO_RIGHT);
+		mi.setText(file.getName());
+		mi.setData(file);
+		mi.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				MenuItem m = (MenuItem) e.getSource();
+				loadFile(createShell(), (File) m.getData());
+			}
+		});
+		recentMenu.setEnabled(true);
 
 		shell.setLayout(new FillLayout());
 
@@ -45,8 +59,8 @@ public class XMIViewer {
 		File tsdFile = new File(dir, "typesystem.xml");
 		tsd =
 				TypeSystemDescriptionFactory
-				.createTypeSystemDescriptionFromPath(tsdFile.toURI()
-						.toString());
+						.createTypeSystemDescriptionFromPath(tsdFile.toURI()
+								.toString());
 		JCas jcas = null;
 		try {
 			jcas = JCasFactory.createJCas(tsd);
@@ -177,6 +191,11 @@ public class XMIViewer {
 				loadFile(sh, new File(name));
 			}
 		});
+		subItem = new MenuItem(menu, SWT.CASCADE);
+		subItem.setText("Open Recent");
+		subItem.setEnabled(false);
+		recentMenu = new Menu(subItem);
+		subItem.setMenu(recentMenu);
 
 		new MenuItem(menu, SWT.SEPARATOR);
 
