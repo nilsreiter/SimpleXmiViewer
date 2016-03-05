@@ -45,9 +45,27 @@ public class XMIViewer extends JFrame {
 	private JDialog aboutDialog;
 	private JFileChooser openDialog;
 
+	public XMIViewer() {
+		super();
+		initialise();
+		openDialog
+				.setCurrentDirectory(new File(System.getProperty("user.home")));
+		int r = openDialog.showOpenDialog(XMIViewer.this);
+		if (r == JFileChooser.APPROVE_OPTION) {
+			File f = openDialog.getSelectedFile();
+			loadFile(f);
+			this.setTitle(f.getName());
+		}
+	}
+
 	public XMIViewer(File file) {
 		super(file.getName());
+		initialise();
+		openDialog.setCurrentDirectory(file.getParentFile());
+		loadFile(file);
+	}
 
+	protected void initialise() {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
@@ -60,7 +78,6 @@ public class XMIViewer extends JFrame {
 
 		// create file chooser dialog
 		openDialog = new JFileChooser();
-		openDialog.setCurrentDirectory(file.getParentFile());
 		openDialog.setFileFilter(new FileFilter() {
 
 			@Override
@@ -91,8 +108,8 @@ public class XMIViewer extends JFrame {
 		closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
-		// fileMenu.add(openMenuItem);
-		// fileMenu.addSeparator();
+		fileMenu.add(openMenuItem);
+		fileMenu.addSeparator();
 		fileMenu.add(closeMenuItem);
 		fileMenu.addSeparator();
 		fileMenu.add(exitMenuItem);
@@ -153,7 +170,6 @@ public class XMIViewer extends JFrame {
 						"Annotation Viewer Help", JOptionPane.PLAIN_MESSAGE);
 			}
 		});
-		loadFile(file);
 	}
 
 	protected void loadFile(File file) {
@@ -213,6 +229,9 @@ public class XMIViewer extends JFrame {
 
 			});
 		}
-		if (args.length == 1) new XMIViewer(new File(args[0]));
+		if (args.length == 1)
+			new XMIViewer(new File(args[0]));
+		else
+			new XMIViewer();
 	}
 }
