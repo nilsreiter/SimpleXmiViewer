@@ -9,6 +9,8 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -44,12 +46,13 @@ public class XMIViewer extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JDialog aboutDialog;
 	private JFileChooser openDialog;
+	static List<XMIViewer> openFiles = new LinkedList<XMIViewer>();
 
 	public XMIViewer() {
 		super();
 		initialise();
 		openDialog
-		.setCurrentDirectory(new File(System.getProperty("user.home")));
+				.setCurrentDirectory(new File(System.getProperty("user.home")));
 		int r = openDialog.showOpenDialog(XMIViewer.this);
 		if (r == JFileChooser.APPROVE_OPTION) {
 			File f = openDialog.getSelectedFile();
@@ -67,12 +70,20 @@ public class XMIViewer extends JFrame {
 		loadFile(file);
 	}
 
+	protected void closeWindow() {
+		openFiles.remove(this);
+		if (openFiles.isEmpty()) {
+			System.exit(0);
+		}
+
+	}
+
 	protected void initialise() {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			System.err
-			.println("Could not set look and feel: " + e.getMessage());
+					.println("Could not set look and feel: " + e.getMessage());
 		}
 
 		// create about dialog
@@ -127,15 +138,17 @@ public class XMIViewer extends JFrame {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				// this.savePreferences();
-				XMIViewer.this.dispose();
+				XMIViewer.this.closeWindow();
 			}
 		});
 
-		// Event Handlling of "Exit" Menu Item
+		// Event Handlling of "Quit" Menu Item
 		exitMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				// savePreferences();
-				System.exit(0);
+				for (XMIViewer v : openFiles) {
+					v.closeWindow();
+				}
 			}
 		});
 
@@ -143,8 +156,7 @@ public class XMIViewer extends JFrame {
 		closeMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				// savePreferences();
-				XMIViewer.this.dispose();
-				System.exit(0);
+				XMIViewer.this.closeWindow();
 			}
 		});
 
@@ -182,8 +194,8 @@ public class XMIViewer extends JFrame {
 		File tsdFile = new File(dir, "typesystem.xml");
 		tsd =
 				TypeSystemDescriptionFactory
-				.createTypeSystemDescriptionFromPath(tsdFile.toURI()
-						.toString());
+						.createTypeSystemDescriptionFromPath(tsdFile.toURI()
+								.toString());
 		JCas jcas = null;
 		try {
 			jcas = JCasFactory.createJCas(tsd);
@@ -209,6 +221,7 @@ public class XMIViewer extends JFrame {
 		getContentPane().add(viewer);
 		pack();
 		setVisible(true);
+		openFiles.add(this);
 	}
 
 	public static void main(String[] args) {
