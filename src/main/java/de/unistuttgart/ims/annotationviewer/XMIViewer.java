@@ -1,5 +1,6 @@
 package de.unistuttgart.ims.annotationviewer;
 
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,7 +32,6 @@ import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.apache.uima.tools.util.gui.AboutDialog;
-import org.apache.uima.tools.viewer.CasAnnotationViewer;
 import org.xml.sax.SAXException;
 
 import com.apple.eawt.AppEvent.OpenFilesEvent;
@@ -46,6 +46,8 @@ public class XMIViewer extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JDialog aboutDialog;
 	private JFileChooser openDialog;
+	private MyCASAnnotationViewer viewer = null;
+
 	static List<XMIViewer> openFiles = new LinkedList<XMIViewer>();
 
 	public XMIViewer() {
@@ -85,7 +87,7 @@ public class XMIViewer extends JFrame {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			System.err
-			.println("Could not set look and feel: " + e.getMessage());
+					.println("Could not set look and feel: " + e.getMessage());
 		}
 
 		// create about dialog
@@ -111,6 +113,7 @@ public class XMIViewer extends JFrame {
 
 		JMenu fileMenu = new JMenu("File");
 		JMenu helpMenu = new JMenu("Help");
+		JMenu viewMenu = new JMenu("View");
 
 		// Menu Items
 		JMenuItem aboutMenuItem = new JMenuItem("About");
@@ -122,15 +125,25 @@ public class XMIViewer extends JFrame {
 		JMenuItem closeMenuItem = new JMenuItem("Close");
 		closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		JMenuItem fontSizeIncr = new JMenuItem("Bigger");
+		fontSizeIncr.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS,
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		JMenuItem fontSizeDecr = new JMenuItem("Smaller");
+		fontSizeDecr.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS,
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
 		fileMenu.add(openMenuItem);
 		fileMenu.addSeparator();
 		fileMenu.add(closeMenuItem);
 		fileMenu.addSeparator();
 		fileMenu.add(exitMenuItem);
+		viewMenu.add(fontSizeIncr);
+		viewMenu.add(fontSizeDecr);
+
 		helpMenu.add(aboutMenuItem);
 		helpMenu.add(helpMenuItem);
 		menuBar.add(fileMenu);
+		menuBar.add(viewMenu);
 		menuBar.add(helpMenu);
 
 		setJMenuBar(menuBar);
@@ -186,6 +199,23 @@ public class XMIViewer extends JFrame {
 						"Annotation Viewer Help", JOptionPane.PLAIN_MESSAGE);
 			}
 		});
+
+		fontSizeDecr.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				int oldSize =
+						XMIViewer.this.viewer.getTextPane().getFont().getSize();
+				XMIViewer.this.viewer.getTextPane().setFont(
+						new Font(Font.SANS_SERIF, Font.PLAIN, oldSize - 1));
+			}
+		});
+		fontSizeIncr.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				int oldSize =
+						XMIViewer.this.viewer.getTextPane().getFont().getSize();
+				XMIViewer.this.viewer.getTextPane().setFont(
+						new Font(Font.SANS_SERIF, Font.PLAIN, oldSize + 1));
+			}
+		});
 	}
 
 	protected void loadFile(File file) {
@@ -196,8 +226,8 @@ public class XMIViewer extends JFrame {
 		File tsdFile = new File(dir, "typesystem.xml");
 		tsd =
 				TypeSystemDescriptionFactory
-				.createTypeSystemDescriptionFromPath(tsdFile.toURI()
-						.toString());
+						.createTypeSystemDescriptionFromPath(tsdFile.toURI()
+								.toString());
 		JCas jcas = null;
 		try {
 			jcas = JCasFactory.createJCas(tsd);
@@ -218,11 +248,12 @@ public class XMIViewer extends JFrame {
 		cas = jcas.getCas();
 
 		// assembly of the main view
-		CasAnnotationViewer viewer = new CasAnnotationViewer();
+		viewer = new MyCASAnnotationViewer();
 		viewer.setCAS(cas);
 		getContentPane().add(viewer);
 		pack();
 		setVisible(true);
+
 		openFiles.add(this);
 	}
 
