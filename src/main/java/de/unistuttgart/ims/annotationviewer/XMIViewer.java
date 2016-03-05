@@ -49,12 +49,14 @@ public class XMIViewer extends JFrame {
 		super();
 		initialise();
 		openDialog
-				.setCurrentDirectory(new File(System.getProperty("user.home")));
+		.setCurrentDirectory(new File(System.getProperty("user.home")));
 		int r = openDialog.showOpenDialog(XMIViewer.this);
 		if (r == JFileChooser.APPROVE_OPTION) {
 			File f = openDialog.getSelectedFile();
 			loadFile(f);
 			this.setTitle(f.getName());
+		} else {
+			System.exit(0);
 		}
 	}
 
@@ -70,7 +72,7 @@ public class XMIViewer extends JFrame {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			System.err
-					.println("Could not set look and feel: " + e.getMessage());
+			.println("Could not set look and feel: " + e.getMessage());
 		}
 
 		// create about dialog
@@ -180,8 +182,8 @@ public class XMIViewer extends JFrame {
 		File tsdFile = new File(dir, "typesystem.xml");
 		tsd =
 				TypeSystemDescriptionFactory
-						.createTypeSystemDescriptionFromPath(tsdFile.toURI()
-								.toString());
+				.createTypeSystemDescriptionFromPath(tsdFile.toURI()
+						.toString());
 		JCas jcas = null;
 		try {
 			jcas = JCasFactory.createJCas(tsd);
