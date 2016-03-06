@@ -27,6 +27,7 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.impl.XmiCasDeserializer;
@@ -94,7 +95,7 @@ public class XMIViewer extends JFrame {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			System.err
-					.println("Could not set look and feel: " + e.getMessage());
+			.println("Could not set look and feel: " + e.getMessage());
 		}
 
 		// create about dialog
@@ -281,7 +282,13 @@ public class XMIViewer extends JFrame {
 			JMenu typeMenu = new JMenu(annoType.getShortName());
 			for (final Annotation anno : segmentMap.get(annoType)) {
 				JMenuItem mItem =
-						new JMenuItem(String.valueOf(anno.getBegin()));
+						new JMenuItem(StringUtils.abbreviate(
+								anno.getCoveredText(), 25)
+								+ " ("
+								+ anno.getBegin()
+								+ "-"
+								+ anno.getEnd()
+								+ ")");
 
 				mItem.addActionListener(new ActionListener() {
 
