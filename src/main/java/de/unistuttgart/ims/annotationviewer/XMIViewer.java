@@ -10,8 +10,11 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -27,9 +30,11 @@ import javax.swing.filechooser.FileFilter;
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.impl.XmiCasDeserializer;
+import org.apache.uima.cas.text.AnnotationIndex;
 import org.apache.uima.fit.factory.JCasFactory;
 import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.apache.uima.tools.util.gui.AboutDialog;
 import org.xml.sax.SAXException;
@@ -46,7 +51,9 @@ public class XMIViewer extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JDialog aboutDialog;
 	private JFileChooser openDialog;
+	private JMenu documentMenu;
 	private MyCASAnnotationViewer viewer = null;
+	String segmentAnnotation = "de.unistuttgart.quadrama.api.DramaSegment";
 
 	static List<XMIViewer> openFiles = new LinkedList<XMIViewer>();
 
@@ -114,6 +121,7 @@ public class XMIViewer extends JFrame {
 		JMenu fileMenu = new JMenu("File");
 		JMenu helpMenu = new JMenu("Help");
 		JMenu viewMenu = new JMenu("View");
+		documentMenu = new JMenu("Document");
 
 		// Menu Items
 		JMenuItem aboutMenuItem = new JMenuItem("About");
@@ -144,6 +152,7 @@ public class XMIViewer extends JFrame {
 		helpMenu.add(helpMenuItem);
 		menuBar.add(fileMenu);
 		menuBar.add(viewMenu);
+		menuBar.add(documentMenu);
 		menuBar.add(helpMenu);
 
 		setJMenuBar(menuBar);
@@ -226,8 +235,8 @@ public class XMIViewer extends JFrame {
 		File tsdFile = new File(dir, "typesystem.xml");
 		tsd =
 				TypeSystemDescriptionFactory
-						.createTypeSystemDescriptionFromPath(tsdFile.toURI()
-								.toString());
+				.createTypeSystemDescriptionFromPath(tsdFile.toURI()
+						.toString());
 		JCas jcas = null;
 		try {
 			jcas = JCasFactory.createJCas(tsd);
@@ -253,6 +262,39 @@ public class XMIViewer extends JFrame {
 		getContentPane().add(viewer);
 		pack();
 		setVisible(true);
+
+		org.apache.uima.cas.Type type =
+				cas.getTypeSystem().getType(segmentAnnotation);
+		AnnotationIndex<? extends Annotation> index =
+				cas.getAnnotationIndex(type);
+		Iterator<? extends Annotation> iter = index.iterator();
+		Map<org.apache.uima.cas.Type, List<Annotation>> segmentMap =
+				new HashMap<org.apache.uima.cas.Type, List<Annotation>>();
+		while (iter.hasNext()) {
+			final Annotation anno = iter.next();
+			if (!segmentMap.containsKey(anno.getType())) {
+				segmentMap.put(anno.getType(), new LinkedList<Annotation>());
+			}
+			segmentMap.get(anno.getType()).add(anno);
+		}
+		for (org.apache.uima.cas.Type annoType : segmentMap.keySet()) {
+			JMenu typeMenu = new JMenu(annoType.getShortName());
+			for (final Annotation anno : segmentMap.get(annoType)) {
+				JMenuItem mItem =
+						new JMenuItem(String.valueOf(anno.getBegin()));
+
+				mItem.addActionListener(new ActionListener() {
+
+					public void actionPerformed(ActionEvent e) {
+						XMIViewer.this.viewer.getTextPane().setCaretPosition(
+								anno.getBegin());
+					}
+
+				});
+				typeMenu.add(mItem);
+			}
+			documentMenu.add(typeMenu);
+		}
 
 		openFiles.add(this);
 	}
