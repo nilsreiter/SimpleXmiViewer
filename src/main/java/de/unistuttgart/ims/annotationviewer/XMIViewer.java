@@ -23,6 +23,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
@@ -30,6 +31,7 @@ import javax.swing.filechooser.FileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CAS;
+import org.apache.uima.cas.CASException;
 import org.apache.uima.cas.impl.XmiCasDeserializer;
 import org.apache.uima.cas.text.AnnotationIndex;
 import org.apache.uima.fit.factory.JCasFactory;
@@ -38,6 +40,7 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.apache.uima.tools.util.gui.AboutDialog;
+import org.apache.uima.tools.viewer.CasTreeViewer;
 import org.xml.sax.SAXException;
 
 import com.apple.eawt.AppEvent.OpenFilesEvent;
@@ -97,7 +100,7 @@ public class XMIViewer extends JFrame {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			System.err
-			.println("Could not set look and feel: " + e.getMessage());
+					.println("Could not set look and feel: " + e.getMessage());
 		}
 
 		// create about dialog
@@ -237,8 +240,8 @@ public class XMIViewer extends JFrame {
 		File tsdFile = new File(dir, "typesystem.xml");
 		tsd =
 				TypeSystemDescriptionFactory
-				.createTypeSystemDescriptionFromPath(tsdFile.toURI()
-						.toString());
+						.createTypeSystemDescriptionFromPath(tsdFile.toURI()
+								.toString());
 		JCas jcas = null;
 		try {
 			jcas = JCasFactory.createJCas(tsd);
@@ -261,7 +264,15 @@ public class XMIViewer extends JFrame {
 		// assembly of the main view
 		viewer = new MyCASAnnotationViewer();
 		viewer.setCAS(cas);
-		getContentPane().add(viewer);
+		JTabbedPane tabbedPane = new JTabbedPane();
+		tabbedPane.add("Viewer", viewer);
+		try {
+			tabbedPane.add("Tree", new CasTreeViewer(cas));
+		} catch (CASException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		getContentPane().add(tabbedPane);
 		pack();
 		setVisible(true);
 		createDocumentMenu(cas);
