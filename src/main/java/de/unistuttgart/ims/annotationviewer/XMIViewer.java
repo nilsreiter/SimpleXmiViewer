@@ -58,6 +58,8 @@ public class XMIViewer extends JFrame {
 
 	static List<XMIViewer> openFiles = new LinkedList<XMIViewer>();
 
+	private JMenuBar menuBar = new JMenuBar();
+
 	public XMIViewer() {
 		super();
 		initialise();
@@ -116,14 +118,13 @@ public class XMIViewer extends JFrame {
 			}
 		});
 
-		// Create Menu Bar
-		JMenuBar menuBar = new JMenuBar();
-
 		JMenu fileMenu = new JMenu("File");
 		JMenu helpMenu = new JMenu("Help");
 		JMenu viewMenu = new JMenu("View");
-		documentMenu = new JMenu("Document");
-
+		if (segmentAnnotation != null) {
+			documentMenu = new JMenu("Document");
+			documentMenu.setEnabled(segmentAnnotation != null);
+		}
 		// Menu Items
 		JMenuItem aboutMenuItem = new JMenuItem("About");
 		JMenuItem helpMenuItem = new JMenuItem("Help");
@@ -153,7 +154,7 @@ public class XMIViewer extends JFrame {
 		helpMenu.add(helpMenuItem);
 		menuBar.add(fileMenu);
 		menuBar.add(viewMenu);
-		menuBar.add(documentMenu);
+		if (segmentAnnotation != null) menuBar.add(documentMenu);
 		menuBar.add(helpMenu);
 
 		setJMenuBar(menuBar);
@@ -263,9 +264,17 @@ public class XMIViewer extends JFrame {
 		getContentPane().add(viewer);
 		pack();
 		setVisible(true);
+		createDocumentMenu(cas);
+		openFiles.add(this);
+	}
+
+	private void createDocumentMenu(CAS cas) {
+		if (segmentAnnotation == null) return;
+		documentMenu.setEnabled(true);
 
 		org.apache.uima.cas.Type type =
 				cas.getTypeSystem().getType(segmentAnnotation);
+
 		AnnotationIndex<? extends Annotation> index =
 				cas.getAnnotationIndex(type);
 		Iterator<? extends Annotation> iter = index.iterator();
@@ -302,8 +311,8 @@ public class XMIViewer extends JFrame {
 			}
 			documentMenu.add(typeMenu);
 		}
+		documentMenu.validate();
 
-		openFiles.add(this);
 	}
 
 	public static void main(String[] args) {
