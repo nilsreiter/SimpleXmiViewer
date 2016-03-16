@@ -6,4 +6,4 @@ This package provides a very simple viewer for XMI files. The app assumes that t
 ```bash
 mvn package
 ```
-
+The `target` directory then contains an executable jar-file `SimpleXmiViewer-VERSION.jar` and an OSX-ready app `SimpleXmiViewer-VERSION.app`.
