@@ -48,8 +48,10 @@
 				<configuration>
 					<mainClass>de.unistuttgart.ims.annotationviewer.XMIViewer</mainClass>
 					<dictionaryFile>MyInfo.plist</dictionaryFile>
-					<bundleName>${project.name}-${project.version}</bundleName>
+					<bundleName>${project.name}</bundleName>
 					<buildDirectory>${project.build.directory}</buildDirectory>
+					<generateDiskImageFile>true</generateDiskImageFile>
+					<diskImageFile>${project.name}-${project.version}</diskImageFile>
 				</configuration>
 				<executions>
 					<execution>
