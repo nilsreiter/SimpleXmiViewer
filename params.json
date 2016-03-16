@@ -1,0 +1,6 @@
+{
+  "name": "Simplexmiviewer",
+  "tagline": "a simple viewer for xmi files",
+  "body": "# Simple XMI annotation viewer\r\n\r\nThis package provides a very simple viewer for XMI files. The app assumes that the typesystem is available as an XML file called typesystem.xml in the same directory (this is what dkpro XmiWriter prints anyway).\r\n\r\n## Compile and package\r\n```bash\r\nmvn package\r\n```\r\n\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
