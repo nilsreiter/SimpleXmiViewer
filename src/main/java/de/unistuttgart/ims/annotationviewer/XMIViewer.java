@@ -15,6 +15,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -56,8 +58,11 @@ public class XMIViewer extends JFrame {
 	private JDialog aboutDialog;
 	private JFileChooser openDialog;
 	private JMenu documentMenu;
+	private JMenu recentMenu;
 	private MyCASAnnotationViewer viewer = null;
 	String segmentAnnotation = "de.unistuttgart.quadrama.api.DramaSegment";
+	static Preferences prefs = Preferences.userRoot().node(
+			"de/unistuttgart/ims/annotationviewer");
 
 	static List<XMIViewer> openFiles = new LinkedList<XMIViewer>();
 
@@ -65,6 +70,7 @@ public class XMIViewer extends JFrame {
 
 	public XMIViewer() {
 		super();
+		System.err.println(prefs.absolutePath());
 		initialise();
 		if (openFiles.isEmpty()) {
 			openDialog.setCurrentDirectory(new File(System
@@ -90,6 +96,11 @@ public class XMIViewer extends JFrame {
 	protected void closeWindow() {
 		openFiles.remove(this);
 		if (openFiles.isEmpty()) {
+			try {
+				prefs.flush();
+			} catch (BackingStoreException e) {
+				e.printStackTrace();
+			}
 			System.exit(0);
 		}
 
@@ -135,17 +146,23 @@ public class XMIViewer extends JFrame {
 		JMenuItem openMenuItem = new JMenuItem("Open...");
 		openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+
+		recentMenu = new JMenu("Open recent");
+
 		JMenuItem closeMenuItem = new JMenuItem("Close");
 		closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+
 		JMenuItem fontSizeIncr = new JMenuItem("Bigger");
 		fontSizeIncr.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+
 		JMenuItem fontSizeDecr = new JMenuItem("Smaller");
 		fontSizeDecr.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
 		fileMenu.add(openMenuItem);
+		fileMenu.add(recentMenu);
 		fileMenu.addSeparator();
 		fileMenu.add(closeMenuItem);
 		fileMenu.addSeparator();
@@ -230,6 +247,23 @@ public class XMIViewer extends JFrame {
 						new Font(Font.SANS_SERIF, Font.PLAIN, oldSize + 1));
 			}
 		});
+		try {
+			for (final String s : prefs.node("history").childrenNames()) {
+				System.err.println(s);
+				JMenuItem mi = new JMenuItem(s);
+				recentMenu.add(mi);
+				mi.addActionListener(new ActionListener() {
+
+					public void actionPerformed(ActionEvent e) {
+						loadFile(new File(prefs.node("history").get(s, "")));
+					}
+
+				});
+			}
+		} catch (BackingStoreException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 
 	protected void loadFile(File file) {
@@ -276,6 +310,13 @@ public class XMIViewer extends JFrame {
 		pack();
 		setVisible(true);
 		createDocumentMenu(cas);
+		prefs.node("history").put(file.getName(), file.getAbsolutePath());
+		try {
+			prefs.flush();
+		} catch (BackingStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		openFiles.add(this);
 	}
 
@@ -326,9 +367,11 @@ public class XMIViewer extends JFrame {
 
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws BackingStoreException {
 		System.setProperty("com.apple.macos.useScreenMenuBar", "true");
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
+		System.err.println(prefs.node("history").childrenNames().length);
+
 		// we want to open files by open-clicking in Finder & co.
 		// not tested yet
 		// source:
@@ -353,5 +396,13 @@ public class XMIViewer extends JFrame {
 			new XMIViewer(new File(args[0]));
 		else
 			new XMIViewer();
+	}
+
+	public void savePreferences() {
+
+	}
+
+	public void restorePreferences() {
+
 	}
 }
