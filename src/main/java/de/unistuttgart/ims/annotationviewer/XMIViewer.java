@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.prefs.Preferences;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -58,7 +59,7 @@ public class XMIViewer extends JFrame {
 	private JMenu documentMenu;
 	private MyCASAnnotationViewer viewer = null;
 	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
-
+	Preferences prefs = Preferences.userRoot().node(XMIViewer.class.getName());
 	static List<XMIViewer> openFiles = new LinkedList<XMIViewer>();
 
 	private JMenuBar menuBar = new JMenuBar();
@@ -66,9 +67,11 @@ public class XMIViewer extends JFrame {
 	public XMIViewer() {
 		super();
 		initialise();
+		setVisible(true);
+
 		if (openFiles.isEmpty()) {
-			openDialog.setCurrentDirectory(new File(System
-					.getProperty("user.home")));
+			openDialog.setCurrentDirectory(new File(prefs.get("lastDirectory",
+					System.getProperty("user.home"))));
 			int r = openDialog.showOpenDialog(XMIViewer.this);
 			if (r == JFileChooser.APPROVE_OPTION) {
 				File f = openDialog.getSelectedFile();
@@ -155,6 +158,7 @@ public class XMIViewer extends JFrame {
 
 		helpMenu.add(aboutMenuItem);
 		helpMenu.add(helpMenuItem);
+
 		menuBar.add(fileMenu);
 		menuBar.add(viewMenu);
 		if (segmentAnnotation != null) menuBar.add(documentMenu);
@@ -230,9 +234,11 @@ public class XMIViewer extends JFrame {
 						new Font(Font.SANS_SERIF, Font.PLAIN, oldSize + 1));
 			}
 		});
+
 	}
 
 	protected void loadFile(File file) {
+		prefs.put("lastDirectory", file.getParentFile().getAbsolutePath());
 		// load type system and CAS
 		TypeSystemDescription tsd;
 		CAS cas = null;
