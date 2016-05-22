@@ -57,7 +57,7 @@ public class XMIViewer extends JFrame {
 	private JFileChooser openDialog;
 	private JMenu documentMenu;
 	private MyCASAnnotationViewer viewer = null;
-	String segmentAnnotation = "de.unistuttgart.quadrama.api.DramaSegment";
+	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
 
 	static List<XMIViewer> openFiles = new LinkedList<XMIViewer>();
 
@@ -100,7 +100,7 @@ public class XMIViewer extends JFrame {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			System.err
-					.println("Could not set look and feel: " + e.getMessage());
+			.println("Could not set look and feel: " + e.getMessage());
 		}
 
 		// create about dialog
@@ -240,8 +240,8 @@ public class XMIViewer extends JFrame {
 		File tsdFile = new File(dir, "typesystem.xml");
 		tsd =
 				TypeSystemDescriptionFactory
-						.createTypeSystemDescriptionFromPath(tsdFile.toURI()
-								.toString());
+				.createTypeSystemDescriptionFromPath(tsdFile.toURI()
+						.toString());
 		JCas jcas = null;
 		try {
 			jcas = JCasFactory.createJCas(tsd);
@@ -281,11 +281,11 @@ public class XMIViewer extends JFrame {
 
 	private void createDocumentMenu(CAS cas) {
 		if (segmentAnnotation == null) return;
-		documentMenu.setEnabled(true);
 
 		org.apache.uima.cas.Type type =
 				cas.getTypeSystem().getType(segmentAnnotation);
-
+		if (type == null) return;
+		documentMenu.setEnabled(true);
 		AnnotationIndex<? extends Annotation> index =
 				cas.getAnnotationIndex(type);
 		Iterator<? extends Annotation> iter = index.iterator();
