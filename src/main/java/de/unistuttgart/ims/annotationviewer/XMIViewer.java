@@ -52,9 +52,13 @@ import org.apache.uima.tools.util.gui.AboutDialog;
 import org.apache.uima.tools.viewer.CasTreeViewer;
 import org.xml.sax.SAXException;
 
+import com.apple.eawt.AboutHandler;
+import com.apple.eawt.AppEvent.AboutEvent;
 import com.apple.eawt.AppEvent.OpenFilesEvent;
+import com.apple.eawt.AppEvent.PreferencesEvent;
 import com.apple.eawt.Application;
 import com.apple.eawt.OpenFilesHandler;
+import com.apple.eawt.PreferencesHandler;
 
 public class XMIViewer extends JFrame {
 
@@ -62,6 +66,7 @@ public class XMIViewer extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JDialog aboutDialog;
+	private JDialog prefDialog;
 	private JFileChooser openDialog;
 	private MyCASAnnotationViewer viewer = null;
 	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
@@ -126,6 +131,8 @@ public class XMIViewer extends JFrame {
 
 		// create about dialog
 		aboutDialog = new AboutDialog(this, "About Annotation Viewer");
+
+		prefDialog = new PreferencesDialog(this, prefs);
 
 		// create file chooser dialog
 		openDialog = new JFileChooser();
@@ -410,6 +417,32 @@ public class XMIViewer extends JFrame {
 					for (Object file : e.getFiles()) {
 						if (file instanceof File) {
 							openFiles.add(new XMIViewer((File) file));
+						}
+					}
+				}
+
+			});
+
+			a.setAboutHandler(new AboutHandler() {
+
+				public void handleAbout(AboutEvent e) {
+					for (XMIViewer v : openFiles) {
+						if (v.isActive()) {
+							v.aboutDialog.setVisible(true);
+							break;
+						}
+					}
+				}
+
+			});
+
+			a.setPreferencesHandler(new PreferencesHandler() {
+
+				public void handlePreferences(PreferencesEvent e) {
+					for (XMIViewer v : openFiles) {
+						if (v.isActive()) {
+							v.prefDialog.setVisible(true);
+							break;
 						}
 					}
 				}
