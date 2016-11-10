@@ -59,7 +59,8 @@ public class XMIViewer extends JFrame {
 	private JMenu documentMenu;
 	private MyCASAnnotationViewer viewer = null;
 	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
-	Preferences prefs = Preferences.userRoot().node(XMIViewer.class.getName());
+	static Preferences prefs = Preferences.userRoot().node(
+			XMIViewer.class.getName());
 	static List<XMIViewer> openFiles = new LinkedList<XMIViewer>();
 
 	private JMenuBar menuBar = new JMenuBar();
@@ -67,6 +68,7 @@ public class XMIViewer extends JFrame {
 	public XMIViewer() {
 		super();
 		initialise();
+		pack();
 		setVisible(true);
 
 		if (openFiles.isEmpty()) {
@@ -103,7 +105,7 @@ public class XMIViewer extends JFrame {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			System.err
-			.println("Could not set look and feel: " + e.getMessage());
+					.println("Could not set look and feel: " + e.getMessage());
 		}
 
 		// create about dialog
@@ -246,8 +248,8 @@ public class XMIViewer extends JFrame {
 		File tsdFile = new File(dir, "typesystem.xml");
 		tsd =
 				TypeSystemDescriptionFactory
-				.createTypeSystemDescriptionFromPath(tsdFile.toURI()
-						.toString());
+						.createTypeSystemDescriptionFromPath(tsdFile.toURI()
+								.toString());
 		JCas jcas = null;
 		try {
 			jcas = JCasFactory.createJCas(tsd);
