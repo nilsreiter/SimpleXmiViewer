@@ -38,6 +38,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
+import org.apache.uima.cas.CASRuntimeException;
 import org.apache.uima.cas.Feature;
 import org.apache.uima.cas.impl.XmiCasDeserializer;
 import org.apache.uima.cas.text.AnnotationIndex;
@@ -62,6 +63,7 @@ public class XMIViewer extends JFrame {
 	private JDialog aboutDialog;
 	private JFileChooser openDialog;
 	private JMenu documentMenu;
+	JMenu recentMenu;
 	private MyCASAnnotationViewer viewer = null;
 	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
 	String titleFeatureName = "de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData:documentTitle";
@@ -150,6 +152,7 @@ public class XMIViewer extends JFrame {
 		JMenuItem helpMenuItem = new JMenuItem("Help");
 		JMenuItem exitMenuItem = new JMenuItem("Quit");
 		JMenuItem openMenuItem = new JMenuItem("Open...");
+		recentMenu = new JMenu("Open Recent");
 		openMenuItem.setAccelerator(
 				KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		JMenuItem closeMenuItem = new JMenuItem("Close");
@@ -162,7 +165,14 @@ public class XMIViewer extends JFrame {
 		fontSizeDecr.setAccelerator(
 				KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
+		for (String r : prefs.get("recents", "").split(":")) {
+			File f = new File(r);
+			JMenuItem mi = new JMenuItem(f.getName());
+			recentMenu.add(mi);
+		}
+
 		fileMenu.add(openMenuItem);
+		fileMenu.add(recentMenu);
 		fileMenu.addSeparator();
 		fileMenu.add(closeMenuItem);
 		fileMenu.addSeparator();
@@ -257,6 +267,13 @@ public class XMIViewer extends JFrame {
 	}
 
 	public void updateThisWindowsMenu(Collection<XMIViewer> windows) {
+		recentMenu.removeAll();
+		for (String r : prefs.get("recents", "").split(":")) {
+			File f = new File(r);
+			JMenuItem mi = new JMenuItem(f.getName());
+			recentMenu.add(mi);
+		}
+
 		windowsMenu.removeAll();
 		for (final XMIViewer v : windows) {
 			JCheckBoxMenuItem item = new JCheckBoxMenuItem(v.getTitle());
@@ -275,6 +292,7 @@ public class XMIViewer extends JFrame {
 	protected void loadFile(File file) {
 		openFiles.add(this);
 		prefs.put("lastDirectory", file.getParentFile().getAbsolutePath());
+		prefs.put("recents", file.getAbsolutePath() + ":" + prefs.get("recents", ""));
 		// load type system and CAS
 		TypeSystemDescription tsd;
 		CAS cas = null;
@@ -303,9 +321,13 @@ public class XMIViewer extends JFrame {
 		}
 		cas = jcas.getCas();
 
-		Feature titleFeature = jcas.getTypeSystem().getFeatureByFullName(titleFeatureName);
-		this.setTitle(jcas.getDocumentAnnotationFs().getFeatureValueAsString(titleFeature));
+		try {
+			Feature titleFeature = jcas.getTypeSystem().getFeatureByFullName(titleFeatureName);
+			this.setTitle(
+					jcas.getDocumentAnnotationFs().getFeatureValueAsString(titleFeature) + " (" + file.getName() + ")");
+		} catch (CASRuntimeException e) {
 
+		}
 		// assembly of the main view
 		viewer = new MyCASAnnotationViewer();
 		viewer.setCAS(cas);
