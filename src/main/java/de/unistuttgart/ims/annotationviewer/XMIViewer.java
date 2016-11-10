@@ -11,10 +11,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
@@ -60,7 +62,7 @@ public class XMIViewer extends JFrame {
 	private MyCASAnnotationViewer viewer = null;
 	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
 	static Preferences prefs = Preferences.userRoot().node(XMIViewer.class.getName());
-	static List<XMIViewer> openFiles = new LinkedList<XMIViewer>();
+	static Set<XMIViewer> openFiles = new HashSet<XMIViewer>();
 
 	static Logger logger = Logger.getAnonymousLogger();
 
@@ -92,10 +94,13 @@ public class XMIViewer extends JFrame {
 		loadFile(file);
 	}
 
-	protected void closeWindow() {
+	protected void closeWindow(boolean quit) {
 		openFiles.remove(this);
-		if (openFiles.isEmpty()) {
+		if (openFiles.isEmpty() && quit) {
 			System.exit(0);
+		} else if (openFiles.isEmpty()) {
+			this.dispose();
+			new XMIViewer();
 		}
 
 	}
@@ -173,7 +178,7 @@ public class XMIViewer extends JFrame {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				// this.savePreferences();
-				XMIViewer.this.closeWindow();
+				XMIViewer.this.closeWindow(false);
 			}
 		});
 
@@ -182,7 +187,7 @@ public class XMIViewer extends JFrame {
 			public void actionPerformed(ActionEvent ae) {
 				// savePreferences();
 				for (XMIViewer v : openFiles) {
-					v.closeWindow();
+					v.closeWindow(true);
 				}
 			}
 		});
@@ -191,7 +196,7 @@ public class XMIViewer extends JFrame {
 		closeMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				// savePreferences();
-				XMIViewer.this.closeWindow();
+				XMIViewer.this.closeWindow(false);
 			}
 		});
 
@@ -334,7 +339,7 @@ public class XMIViewer extends JFrame {
 				public void openFiles(OpenFilesEvent e) {
 					for (Object file : e.getFiles()) {
 						if (file instanceof File) {
-							new XMIViewer((File) file);
+							openFiles.add(new XMIViewer((File) file));
 						}
 					}
 				}
