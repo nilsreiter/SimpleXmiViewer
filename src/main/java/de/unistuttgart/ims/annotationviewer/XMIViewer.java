@@ -10,6 +10,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,6 +21,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -36,6 +38,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
+import org.apache.uima.cas.Feature;
 import org.apache.uima.cas.impl.XmiCasDeserializer;
 import org.apache.uima.cas.text.AnnotationIndex;
 import org.apache.uima.fit.factory.JCasFactory;
@@ -61,8 +64,11 @@ public class XMIViewer extends JFrame {
 	private JMenu documentMenu;
 	private MyCASAnnotationViewer viewer = null;
 	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
+	String titleFeatureName = "de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData:documentTitle";
 	static Preferences prefs = Preferences.userRoot().node(XMIViewer.class.getName());
 	static Set<XMIViewer> openFiles = new HashSet<XMIViewer>();
+
+	JMenu windowsMenu;
 
 	static Logger logger = Logger.getAnonymousLogger();
 
@@ -96,6 +102,7 @@ public class XMIViewer extends JFrame {
 
 	protected void closeWindow(boolean quit) {
 		openFiles.remove(this);
+		this.updateAllWindowsMenus(openFiles);
 		if (openFiles.isEmpty() && quit) {
 			System.exit(0);
 		} else if (openFiles.isEmpty()) {
@@ -133,6 +140,7 @@ public class XMIViewer extends JFrame {
 		JMenu fileMenu = new JMenu("File");
 		JMenu helpMenu = new JMenu("Help");
 		JMenu viewMenu = new JMenu("View");
+		windowsMenu = new JMenu("Windows");
 		if (segmentAnnotation != null) {
 			documentMenu = new JMenu("Document");
 			documentMenu.setEnabled(segmentAnnotation != null);
@@ -169,6 +177,7 @@ public class XMIViewer extends JFrame {
 		menuBar.add(viewMenu);
 		if (segmentAnnotation != null)
 			menuBar.add(documentMenu);
+		menuBar.add(windowsMenu);
 		menuBar.add(helpMenu);
 
 		setJMenuBar(menuBar);
@@ -242,6 +251,27 @@ public class XMIViewer extends JFrame {
 
 	}
 
+	public void updateAllWindowsMenus(Collection<XMIViewer> windows) {
+		for (XMIViewer v : windows)
+			v.updateThisWindowsMenu(windows);
+	}
+
+	public void updateThisWindowsMenu(Collection<XMIViewer> windows) {
+		windowsMenu.removeAll();
+		for (final XMIViewer v : windows) {
+			JCheckBoxMenuItem item = new JCheckBoxMenuItem(v.getTitle());
+			if (v == this) {
+				item.setSelected(true);
+			} else
+				item.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						v.toFront();
+					}
+				});
+			windowsMenu.add(item);
+		}
+	}
+
 	protected void loadFile(File file) {
 		openFiles.add(this);
 		prefs.put("lastDirectory", file.getParentFile().getAbsolutePath());
@@ -250,6 +280,10 @@ public class XMIViewer extends JFrame {
 		CAS cas = null;
 		File dir = file.getParentFile();
 		File tsdFile = new File(dir, "typesystem.xml");
+		if (!(tsdFile.exists() && tsdFile.canRead())) {
+			this.closeWindow(false);
+			return;
+		}
 		tsd = TypeSystemDescriptionFactory.createTypeSystemDescriptionFromPath(tsdFile.toURI().toString());
 		JCas jcas = null;
 		try {
@@ -269,6 +303,9 @@ public class XMIViewer extends JFrame {
 		}
 		cas = jcas.getCas();
 
+		Feature titleFeature = jcas.getTypeSystem().getFeatureByFullName(titleFeatureName);
+		this.setTitle(jcas.getDocumentAnnotationFs().getFeatureValueAsString(titleFeature));
+
 		// assembly of the main view
 		viewer = new MyCASAnnotationViewer();
 		viewer.setCAS(cas);
@@ -284,6 +321,7 @@ public class XMIViewer extends JFrame {
 		pack();
 		setVisible(true);
 		createDocumentMenu(cas);
+		updateAllWindowsMenus(openFiles);
 	}
 
 	private void createDocumentMenu(CAS cas) {
