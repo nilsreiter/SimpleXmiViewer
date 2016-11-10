@@ -1,6 +1,7 @@
 package de.unistuttgart.ims.annotationviewer;
 
 import java.awt.BorderLayout;
+import java.awt.Button;
 import java.awt.Color;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,13 +21,13 @@ import javax.swing.text.Highlighter;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.tools.viewer.CasAnnotationViewer;
 
-public class MyCASAnnotationViewer extends CasAnnotationViewer implements
-		DocumentListener {
+public class MyCASAnnotationViewer extends CasAnnotationViewer implements DocumentListener {
 
 	private static final long serialVersionUID = 1L;
 	final static Color HILIT_COLOR = Color.PINK;
 	JTextPane textPane = null;
 	JTextField textField;
+	Button prevButton, nextButton;
 	final Highlighter hilit;
 	final Highlighter.HighlightPainter painter;
 
@@ -51,16 +52,20 @@ public class MyCASAnnotationViewer extends CasAnnotationViewer implements
 		textField = new JTextField(20);
 		textField.setToolTipText("Search");
 		textField.getDocument().addDocumentListener(this);
+
+		prevButton = new Button("<");
+		nextButton = new Button(">");
+
 		searchPanel.add(textField);
+		searchPanel.add(prevButton);
+		searchPanel.add(nextButton);
 		return searchPanel;
 	}
 
 	public JTextPane getTextPane() {
 		if (textPane == null)
-			textPane =
-					(JTextPane) ((JViewport) ((JScrollPane) ((JSplitPane) ((JSplitPane) getComponent(0))
-							.getLeftComponent()).getTopComponent())
-							.getComponent(0)).getComponent(0);
+			textPane = (JTextPane) ((JViewport) ((JScrollPane) ((JSplitPane) ((JSplitPane) getComponent(0))
+					.getLeftComponent()).getTopComponent()).getComponent(0)).getComponent(0);
 		return textPane;
 	}
 
@@ -72,7 +77,8 @@ public class MyCASAnnotationViewer extends CasAnnotationViewer implements
 		search();
 	}
 
-	public void changedUpdate(DocumentEvent e) {}
+	public void changedUpdate(DocumentEvent e) {
+	}
 
 	public void search() {
 		hilit.removeAllHighlights();
