@@ -82,7 +82,7 @@ public class XMIViewer extends JFrame {
 		initialise();
 
 		if (openFiles.isEmpty()) {
-			logger.info("Showing open file dialog ...");
+			logger.fine("Showing open file dialog ...");
 			setVisible(true);
 			openDialog.setCurrentDirectory(new File(prefs.get("lastDirectory", System.getProperty("user.home"))));
 			int r = openDialog.showOpenDialog(this);
