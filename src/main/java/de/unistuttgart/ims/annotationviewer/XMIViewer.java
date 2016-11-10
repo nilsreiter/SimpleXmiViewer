@@ -34,6 +34,7 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CAS;
@@ -62,14 +63,14 @@ public class XMIViewer extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JDialog aboutDialog;
 	private JFileChooser openDialog;
-	private JMenu documentMenu;
-	JMenu recentMenu;
 	private MyCASAnnotationViewer viewer = null;
 	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
 	String titleFeatureName = "de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData:documentTitle";
 	static Preferences prefs = Preferences.userRoot().node(XMIViewer.class.getName());
 	static Set<XMIViewer> openFiles = new HashSet<XMIViewer>();
 
+	JMenu documentMenu;
+	JMenu recentMenu;
 	JMenu windowsMenu;
 
 	static Logger logger = Logger.getAnonymousLogger();
@@ -164,12 +165,6 @@ public class XMIViewer extends JFrame {
 		JMenuItem fontSizeDecr = new JMenuItem("Smaller");
 		fontSizeDecr.setAccelerator(
 				KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-
-		for (String r : prefs.get("recents", "").split(":")) {
-			File f = new File(r);
-			JMenuItem mi = new JMenuItem(f.getName());
-			recentMenu.add(mi);
-		}
 
 		fileMenu.add(openMenuItem);
 		fileMenu.add(recentMenu);
@@ -268,9 +263,16 @@ public class XMIViewer extends JFrame {
 
 	public void updateThisWindowsMenu(Collection<XMIViewer> windows) {
 		recentMenu.removeAll();
-		for (String r : prefs.get("recents", "").split(":")) {
-			File f = new File(r);
+		for (String r : getRecentFilenames(10)) {
+			final File f = new File(r);
 			JMenuItem mi = new JMenuItem(f.getName());
+			mi.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent e) {
+					new XMIViewer(f);
+				}
+
+			});
 			recentMenu.add(mi);
 		}
 
@@ -292,7 +294,8 @@ public class XMIViewer extends JFrame {
 	protected void loadFile(File file) {
 		openFiles.add(this);
 		prefs.put("lastDirectory", file.getParentFile().getAbsolutePath());
-		prefs.put("recents", file.getAbsolutePath() + ":" + prefs.get("recents", ""));
+		prefs.put("recents", file.getAbsolutePath() + File.pathSeparator
+				+ StringUtils.join(getRecentFilenames(10), File.pathSeparator));
 		// load type system and CAS
 		TypeSystemDescription tsd;
 		CAS cas = null;
@@ -333,12 +336,13 @@ public class XMIViewer extends JFrame {
 		viewer.setCAS(cas);
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.add("Viewer", viewer);
-		try {
-			tabbedPane.add("Tree", new CasTreeViewer(cas));
-		} catch (CASException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		if (false)
+			try {
+				tabbedPane.add("Tree", new CasTreeViewer(cas));
+			} catch (CASException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		getContentPane().add(tabbedPane);
 		pack();
 		setVisible(true);
@@ -383,6 +387,10 @@ public class XMIViewer extends JFrame {
 		}
 		documentMenu.validate();
 
+	}
+
+	public static String[] getRecentFilenames(int n) {
+		return (String[]) ArrayUtils.subarray(prefs.get("recents", "").split(File.pathSeparator), 0, n);
 	}
 
 	public static void main(String[] args) {
