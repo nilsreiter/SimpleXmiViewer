@@ -11,10 +11,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import javax.swing.JDialog;
@@ -50,29 +53,30 @@ import com.apple.eawt.OpenFilesHandler;
 
 public class XMIViewer extends JFrame {
 
-	private static final String HELP_MESSAGE =
-			"Instructions for using Xmi Viewer";
+	private static final String HELP_MESSAGE = "Instructions for using Xmi Viewer";
 
 	private static final long serialVersionUID = 1L;
 	private JDialog aboutDialog;
 	private JFileChooser openDialog;
 	private JMenu documentMenu;
 	private MyCASAnnotationViewer viewer = null;
-	String segmentAnnotation = "de.unistuttgart.quadrama.api.DramaSegment";
-	Preferences prefs = Preferences.userRoot().node(XMIViewer.class.getName());
-	static List<XMIViewer> openFiles = new LinkedList<XMIViewer>();
+	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
+	static Preferences prefs = Preferences.userRoot().node(XMIViewer.class.getName());
+	static Set<XMIViewer> openFiles = new HashSet<XMIViewer>();
+
+	static Logger logger = Logger.getAnonymousLogger();
 
 	private JMenuBar menuBar = new JMenuBar();
 
 	public XMIViewer() {
 		super();
 		initialise();
-		setVisible(true);
 
 		if (openFiles.isEmpty()) {
-			openDialog.setCurrentDirectory(new File(prefs.get("lastDirectory",
-					System.getProperty("user.home"))));
-			int r = openDialog.showOpenDialog(XMIViewer.this);
+			logger.info("Showing open file dialog ...");
+			setVisible(true);
+			openDialog.setCurrentDirectory(new File(prefs.get("lastDirectory", System.getProperty("user.home"))));
+			int r = openDialog.showOpenDialog(this);
 			if (r == JFileChooser.APPROVE_OPTION) {
 				File f = openDialog.getSelectedFile();
 				loadFile(f);
@@ -90,10 +94,13 @@ public class XMIViewer extends JFrame {
 		loadFile(file);
 	}
 
-	protected void closeWindow() {
+	protected void closeWindow(boolean quit) {
 		openFiles.remove(this);
-		if (openFiles.isEmpty()) {
+		if (openFiles.isEmpty() && quit) {
 			System.exit(0);
+		} else if (openFiles.isEmpty()) {
+			this.dispose();
+			new XMIViewer();
 		}
 
 	}
@@ -102,8 +109,7 @@ public class XMIViewer extends JFrame {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
-			System.err
-			.println("Could not set look and feel: " + e.getMessage());
+			logger.severe("Could not set look and feel: " + e.getMessage());
 		}
 
 		// create about dialog
@@ -136,17 +142,17 @@ public class XMIViewer extends JFrame {
 		JMenuItem helpMenuItem = new JMenuItem("Help");
 		JMenuItem exitMenuItem = new JMenuItem("Quit");
 		JMenuItem openMenuItem = new JMenuItem("Open...");
-		openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		openMenuItem.setAccelerator(
+				KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		JMenuItem closeMenuItem = new JMenuItem("Close");
-		closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		closeMenuItem.setAccelerator(
+				KeyStroke.getKeyStroke(KeyEvent.VK_W, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		JMenuItem fontSizeIncr = new JMenuItem("Bigger");
-		fontSizeIncr.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		fontSizeIncr.setAccelerator(
+				KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		JMenuItem fontSizeDecr = new JMenuItem("Smaller");
-		fontSizeDecr.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		fontSizeDecr.setAccelerator(
+				KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
 		fileMenu.add(openMenuItem);
 		fileMenu.addSeparator();
@@ -161,7 +167,8 @@ public class XMIViewer extends JFrame {
 
 		menuBar.add(fileMenu);
 		menuBar.add(viewMenu);
-		if (segmentAnnotation != null) menuBar.add(documentMenu);
+		if (segmentAnnotation != null)
+			menuBar.add(documentMenu);
 		menuBar.add(helpMenu);
 
 		setJMenuBar(menuBar);
@@ -171,7 +178,7 @@ public class XMIViewer extends JFrame {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				// this.savePreferences();
-				XMIViewer.this.closeWindow();
+				XMIViewer.this.closeWindow(false);
 			}
 		});
 
@@ -180,7 +187,7 @@ public class XMIViewer extends JFrame {
 			public void actionPerformed(ActionEvent ae) {
 				// savePreferences();
 				for (XMIViewer v : openFiles) {
-					v.closeWindow();
+					v.closeWindow(true);
 				}
 			}
 		});
@@ -189,7 +196,7 @@ public class XMIViewer extends JFrame {
 		closeMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				// savePreferences();
-				XMIViewer.this.closeWindow();
+				XMIViewer.this.closeWindow(false);
 			}
 		});
 
@@ -213,41 +220,37 @@ public class XMIViewer extends JFrame {
 		// Event Handlling of "Help" Menu Item
 		helpMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				JOptionPane.showMessageDialog(XMIViewer.this, HELP_MESSAGE,
-						"Annotation Viewer Help", JOptionPane.PLAIN_MESSAGE);
+				JOptionPane.showMessageDialog(XMIViewer.this, HELP_MESSAGE, "Annotation Viewer Help",
+						JOptionPane.PLAIN_MESSAGE);
 			}
 		});
 
 		fontSizeDecr.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				int oldSize =
-						XMIViewer.this.viewer.getTextPane().getFont().getSize();
-				XMIViewer.this.viewer.getTextPane().setFont(
-						new Font(Font.SANS_SERIF, Font.PLAIN, oldSize - 1));
+				int oldSize = XMIViewer.this.viewer.getTextPane().getFont().getSize();
+				XMIViewer.this.viewer.getTextPane().setFont(new Font(Font.SANS_SERIF, Font.PLAIN, oldSize - 1));
 			}
 		});
 		fontSizeIncr.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				int oldSize =
-						XMIViewer.this.viewer.getTextPane().getFont().getSize();
-				XMIViewer.this.viewer.getTextPane().setFont(
-						new Font(Font.SANS_SERIF, Font.PLAIN, oldSize + 1));
+				int oldSize = XMIViewer.this.viewer.getTextPane().getFont().getSize();
+				XMIViewer.this.viewer.getTextPane().setFont(new Font(Font.SANS_SERIF, Font.PLAIN, oldSize + 1));
 			}
 		});
+
+		logger.info("Initialised window.");
 
 	}
 
 	protected void loadFile(File file) {
+		openFiles.add(this);
 		prefs.put("lastDirectory", file.getParentFile().getAbsolutePath());
 		// load type system and CAS
 		TypeSystemDescription tsd;
 		CAS cas = null;
 		File dir = file.getParentFile();
 		File tsdFile = new File(dir, "typesystem.xml");
-		tsd =
-				TypeSystemDescriptionFactory
-				.createTypeSystemDescriptionFromPath(tsdFile.toURI()
-						.toString());
+		tsd = TypeSystemDescriptionFactory.createTypeSystemDescriptionFromPath(tsdFile.toURI().toString());
 		JCas jcas = null;
 		try {
 			jcas = JCasFactory.createJCas(tsd);
@@ -256,8 +259,7 @@ public class XMIViewer extends JFrame {
 			System.exit(1);
 		}
 		try {
-			XmiCasDeserializer.deserialize(new FileInputStream(file),
-					jcas.getCas(), true);
+			XmiCasDeserializer.deserialize(new FileInputStream(file), jcas.getCas(), true);
 		} catch (SAXException e1) {
 			e1.printStackTrace();
 			System.exit(1);
@@ -282,21 +284,19 @@ public class XMIViewer extends JFrame {
 		pack();
 		setVisible(true);
 		createDocumentMenu(cas);
-		openFiles.add(this);
 	}
 
 	private void createDocumentMenu(CAS cas) {
-		if (segmentAnnotation == null) return;
+		if (segmentAnnotation == null)
+			return;
+
+		org.apache.uima.cas.Type type = cas.getTypeSystem().getType(segmentAnnotation);
+		if (type == null)
+			return;
 		documentMenu.setEnabled(true);
-
-		org.apache.uima.cas.Type type =
-				cas.getTypeSystem().getType(segmentAnnotation);
-
-		AnnotationIndex<? extends Annotation> index =
-				cas.getAnnotationIndex(type);
+		AnnotationIndex<? extends Annotation> index = cas.getAnnotationIndex(type);
 		Iterator<? extends Annotation> iter = index.iterator();
-		Map<org.apache.uima.cas.Type, List<Annotation>> segmentMap =
-				new HashMap<org.apache.uima.cas.Type, List<Annotation>>();
+		Map<org.apache.uima.cas.Type, List<Annotation>> segmentMap = new HashMap<org.apache.uima.cas.Type, List<Annotation>>();
 		while (iter.hasNext()) {
 			final Annotation anno = iter.next();
 			if (!segmentMap.containsKey(anno.getType())) {
@@ -307,20 +307,13 @@ public class XMIViewer extends JFrame {
 		for (org.apache.uima.cas.Type annoType : segmentMap.keySet()) {
 			JMenu typeMenu = new JMenu(annoType.getShortName());
 			for (final Annotation anno : segmentMap.get(annoType)) {
-				JMenuItem mItem =
-						new JMenuItem(StringUtils.abbreviate(
-								anno.getCoveredText(), 25)
-								+ " ("
-								+ anno.getBegin()
-								+ "-"
-								+ anno.getEnd()
-								+ ")");
+				JMenuItem mItem = new JMenuItem(StringUtils.abbreviate(anno.getCoveredText(), 25) + " ("
+						+ anno.getBegin() + "-" + anno.getEnd() + ")");
 
 				mItem.addActionListener(new ActionListener() {
 
 					public void actionPerformed(ActionEvent e) {
-						XMIViewer.this.viewer.getTextPane().setCaretPosition(
-								anno.getBegin());
+						XMIViewer.this.viewer.getTextPane().setCaretPosition(anno.getBegin());
 					}
 
 				});
@@ -344,11 +337,9 @@ public class XMIViewer extends JFrame {
 			a.setOpenFileHandler(new OpenFilesHandler() {
 
 				public void openFiles(OpenFilesEvent e) {
-
 					for (Object file : e.getFiles()) {
 						if (file instanceof File) {
-							XMIViewer v = new XMIViewer((File) file);
-							v.openDialog.cancelSelection();
+							openFiles.add(new XMIViewer((File) file));
 						}
 					}
 				}
@@ -357,7 +348,8 @@ public class XMIViewer extends JFrame {
 		}
 		if (args.length == 1)
 			new XMIViewer(new File(args[0]));
-		else
+		else if (openFiles.isEmpty())
 			new XMIViewer();
 	}
+
 }
