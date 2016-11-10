@@ -104,12 +104,14 @@ public class XMIViewer extends JFrame {
 	}
 
 	protected void closeWindow(boolean quit) {
+		logger.info("Closing window.");
 		openFiles.remove(this);
 		this.updateAllWindowsMenus(openFiles);
+		this.dispose();
+
 		if (openFiles.isEmpty() && quit) {
 			System.exit(0);
 		} else if (openFiles.isEmpty()) {
-			this.dispose();
 			new XMIViewer();
 		}
 
@@ -192,7 +194,7 @@ public class XMIViewer extends JFrame {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				// this.savePreferences();
-				XMIViewer.this.closeWindow(false);
+				closeWindow(false);
 			}
 		});
 
@@ -210,7 +212,7 @@ public class XMIViewer extends JFrame {
 		closeMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				// savePreferences();
-				XMIViewer.this.closeWindow(false);
+				closeWindow(false);
 			}
 		});
 
