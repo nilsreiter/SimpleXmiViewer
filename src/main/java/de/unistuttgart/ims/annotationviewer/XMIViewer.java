@@ -19,11 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -46,10 +43,10 @@ import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
-import org.apache.uima.tools.util.gui.AboutDialog;
 import org.apache.uima.tools.viewer.CasTreeViewer;
 import org.xml.sax.SAXException;
 
+import com.apple.eawt.AppEvent.AboutEvent;
 import com.apple.eawt.AppEvent.QuitEvent;
 import com.apple.eawt.QuitResponse;
 
@@ -58,19 +55,9 @@ public class XMIViewer extends JFrame {
 	private static final String HELP_MESSAGE = "Instructions for using Xmi Viewer";
 
 	private static final long serialVersionUID = 1L;
-	@Deprecated
-	private JDialog aboutDialog;
-	@Deprecated
-	private JDialog prefDialog;
-
-	@Deprecated
-	private JFileChooser openDialog;
 	private MyCASAnnotationViewer viewer = null;
 	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
 	String titleFeatureName = "de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData:documentTitle";
-
-	@Deprecated
-	static Preferences prefs = Preferences.userRoot().node(XMIViewer.class.getName());
 
 	@Deprecated
 	static Set<XMIViewer> openFiles = new HashSet<XMIViewer>();
@@ -84,27 +71,6 @@ public class XMIViewer extends JFrame {
 	private JMenuBar menuBar = new JMenuBar();
 
 	MainApplication mainApplication;
-
-	@Deprecated
-	public XMIViewer(MainApplication mApplication) {
-		super();
-		mainApplication = mApplication;
-		initialise();
-
-		if (openFiles.isEmpty()) {
-			logger.fine("Showing open file dialog ...");
-			setVisible(true);
-			openDialog.setCurrentDirectory(new File(prefs.get("lastDirectory", System.getProperty("user.home"))));
-			int r = openDialog.showOpenDialog(this);
-			if (r == JFileChooser.APPROVE_OPTION) {
-				File f = openDialog.getSelectedFile();
-				loadFile(f);
-				this.setTitle(f.getName());
-			} else if (openFiles.isEmpty()) {
-				System.exit(0);
-			}
-		}
-	}
 
 	public XMIViewer(MainApplication mApplication, File file) {
 		super(file.getName());
@@ -123,11 +89,6 @@ public class XMIViewer extends JFrame {
 		} catch (Exception e) {
 			logger.severe("Could not set look and feel: " + e.getMessage());
 		}
-
-		// create about dialog
-		aboutDialog = new AboutDialog(this, "About Annotation Viewer");
-
-		prefDialog = new PreferencesDialog(this, prefs);
 
 		JMenu fileMenu = new JMenu("File");
 		JMenu helpMenu = new JMenu("Help");
@@ -209,7 +170,7 @@ public class XMIViewer extends JFrame {
 		// Event Handlling of "About" Menu Item
 		aboutMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				showAbout();
+				mainApplication.handleAbout(new AboutEvent());
 			}
 		});
 
@@ -359,14 +320,6 @@ public class XMIViewer extends JFrame {
 		}
 		documentMenu.validate();
 
-	}
-
-	public void showPref() {
-		this.prefDialog.setVisible(true);
-	}
-
-	public void showAbout() {
-		this.aboutDialog.setVisible(true);
 	}
 
 }

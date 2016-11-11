@@ -1,15 +1,21 @@
 package de.unistuttgart.ims.annotationviewer;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JMenu;
 import javax.swing.filechooser.FileFilter;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.uima.tools.util.gui.AboutDialog;
 
 import com.apple.eawt.AboutHandler;
 import com.apple.eawt.AppEvent.AboutEvent;
@@ -26,11 +32,18 @@ public class MainApplication implements AboutHandler, PreferencesHandler, OpenFi
 	Set<XMIViewer> openFiles = new HashSet<XMIViewer>();
 
 	Preferences preferences;
+	JDialog aboutDialog;
+
+	JDialog prefDialog;
 
 	JFileChooser openDialog;
 
 	public MainApplication(String[] args) {
 		preferences = Preferences.userRoot().node(XMIViewer.class.getName());
+
+		aboutDialog = new AboutDialog(null, "About Annotation Viewer");
+
+		prefDialog = new PreferencesDialog(null, preferences);
 
 		openDialog = new JFileChooser();
 		openDialog.setFileFilter(new FileFilter() {
@@ -63,6 +76,24 @@ public class MainApplication implements AboutHandler, PreferencesHandler, OpenFi
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
 
 		new MainApplication(args);
+	}
+
+	@Deprecated
+	public JMenu getWindowsMenu() {
+		JMenu menu = new JMenu("Windows");
+		for (final XMIViewer v : openFiles) {
+			JCheckBoxMenuItem item = new JCheckBoxMenuItem(v.getTitle());
+			if (v == getFrontWindow()) {
+				item.setSelected(true);
+			} else
+				item.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						v.toFront();
+					}
+				});
+			menu.add(item);
+		}
+		return menu;
 	}
 
 	private XMIViewer getFrontWindow() {
@@ -98,11 +129,11 @@ public class MainApplication implements AboutHandler, PreferencesHandler, OpenFi
 	}
 
 	public void handleAbout(AboutEvent e) {
-		getFrontWindow().showAbout();
+		aboutDialog.setVisible(true);
 	}
 
 	public void handlePreferences(PreferencesEvent e) {
-		getFrontWindow().showPref();
+		prefDialog.setVisible(true);
 	}
 
 	public void openFiles(OpenFilesEvent e) {
