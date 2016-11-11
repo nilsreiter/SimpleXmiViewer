@@ -32,9 +32,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
-import javax.swing.filechooser.FileFilter;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CAS;
@@ -52,13 +50,8 @@ import org.apache.uima.tools.util.gui.AboutDialog;
 import org.apache.uima.tools.viewer.CasTreeViewer;
 import org.xml.sax.SAXException;
 
-import com.apple.eawt.AboutHandler;
-import com.apple.eawt.AppEvent.AboutEvent;
-import com.apple.eawt.AppEvent.OpenFilesEvent;
-import com.apple.eawt.AppEvent.PreferencesEvent;
-import com.apple.eawt.Application;
-import com.apple.eawt.OpenFilesHandler;
-import com.apple.eawt.PreferencesHandler;
+import com.apple.eawt.AppEvent.QuitEvent;
+import com.apple.eawt.QuitResponse;
 
 public class XMIViewer extends JFrame {
 
@@ -67,11 +60,17 @@ public class XMIViewer extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JDialog aboutDialog;
 	private JDialog prefDialog;
+
+	@Deprecated
 	private JFileChooser openDialog;
 	private MyCASAnnotationViewer viewer = null;
 	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
 	String titleFeatureName = "de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData:documentTitle";
+
+	@Deprecated
 	static Preferences prefs = Preferences.userRoot().node(XMIViewer.class.getName());
+
+	@Deprecated
 	static Set<XMIViewer> openFiles = new HashSet<XMIViewer>();
 
 	JMenu documentMenu;
@@ -82,8 +81,12 @@ public class XMIViewer extends JFrame {
 
 	private JMenuBar menuBar = new JMenuBar();
 
-	public XMIViewer() {
+	MainApplication mainApplication;
+
+	@Deprecated
+	public XMIViewer(MainApplication mApplication) {
 		super();
+		mainApplication = mApplication;
 		initialise();
 
 		if (openFiles.isEmpty()) {
@@ -101,25 +104,15 @@ public class XMIViewer extends JFrame {
 		}
 	}
 
-	public XMIViewer(File file) {
+	public XMIViewer(MainApplication mApplication, File file) {
 		super(file.getName());
+		mainApplication = mApplication;
+
 		initialise();
-		openDialog.setCurrentDirectory(file.getParentFile());
-		loadFile(file);
 	}
 
 	protected void closeWindow(boolean quit) {
-		logger.info("Closing window.");
-		openFiles.remove(this);
-		this.updateAllWindowsMenus(openFiles);
-		this.dispose();
-
-		if (openFiles.isEmpty() && quit) {
-			System.exit(0);
-		} else if (openFiles.isEmpty()) {
-			new XMIViewer();
-		}
-
+		mainApplication.close(this);
 	}
 
 	protected void initialise() {
@@ -133,21 +126,6 @@ public class XMIViewer extends JFrame {
 		aboutDialog = new AboutDialog(this, "About Annotation Viewer");
 
 		prefDialog = new PreferencesDialog(this, prefs);
-
-		// create file chooser dialog
-		openDialog = new JFileChooser();
-		openDialog.setFileFilter(new FileFilter() {
-
-			@Override
-			public boolean accept(File f) {
-				return f.isDirectory() || f.getName().endsWith(".xmi");
-			}
-
-			@Override
-			public String getDescription() {
-				return "UIMA Xmi Files";
-			}
-		});
 
 		JMenu fileMenu = new JMenu("File");
 		JMenu helpMenu = new JMenu("Help");
@@ -200,18 +178,14 @@ public class XMIViewer extends JFrame {
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				// this.savePreferences();
-				closeWindow(false);
+				mainApplication.close((XMIViewer) e.getSource());
 			}
 		});
 
 		// Event Handlling of "Quit" Menu Item
 		exitMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				// savePreferences();
-				for (XMIViewer v : openFiles) {
-					v.closeWindow(true);
-				}
+				mainApplication.handleQuitRequestWith(new QuitEvent(), new QuitResponse());
 			}
 		});
 
@@ -226,17 +200,14 @@ public class XMIViewer extends JFrame {
 		// Event Handlling of "Open" Menu Item
 		openMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				int r = openDialog.showOpenDialog(XMIViewer.this);
-				if (r == JFileChooser.APPROVE_OPTION) {
-					new XMIViewer(openDialog.getSelectedFile());
-				}
+				mainApplication.fileOpenDialog();
 			}
 		});
 
 		// Event Handlling of "About" Menu Item
 		aboutMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				aboutDialog.setVisible(true);
+				showAbout();
 			}
 		});
 
@@ -265,20 +236,15 @@ public class XMIViewer extends JFrame {
 
 	}
 
-	public void updateAllWindowsMenus(Collection<XMIViewer> windows) {
-		for (XMIViewer v : windows)
-			v.updateThisWindowsMenu(windows);
-	}
-
-	public void updateThisWindowsMenu(Collection<XMIViewer> windows) {
+	public void windowsMenu(Collection<XMIViewer> windows) {
 		recentMenu.removeAll();
-		for (String r : getRecentFilenames(10)) {
+		for (String r : mainApplication.getRecentFilenames(10)) {
 			final File f = new File(r);
 			JMenuItem mi = new JMenuItem(f.getName());
 			mi.addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
-					new XMIViewer(f);
+					mainApplication.open(f);
 				}
 
 			});
@@ -300,11 +266,7 @@ public class XMIViewer extends JFrame {
 		}
 	}
 
-	protected void loadFile(File file) {
-		openFiles.add(this);
-		prefs.put("lastDirectory", file.getParentFile().getAbsolutePath());
-		prefs.put("recents", file.getAbsolutePath() + File.pathSeparator
-				+ StringUtils.join(getRecentFilenames(10), File.pathSeparator));
+	public void loadFile(File file) {
 		// load type system and CAS
 		TypeSystemDescription tsd;
 		CAS cas = null;
@@ -356,7 +318,6 @@ public class XMIViewer extends JFrame {
 		pack();
 		setVisible(true);
 		createDocumentMenu(cas);
-		updateAllWindowsMenus(openFiles);
 	}
 
 	private void createDocumentMenu(CAS cas) {
@@ -398,61 +359,12 @@ public class XMIViewer extends JFrame {
 
 	}
 
-	public static String[] getRecentFilenames(int n) {
-		return (String[]) ArrayUtils.subarray(prefs.get("recents", "").split(File.pathSeparator), 0, n);
+	public void showPref() {
+		this.prefDialog.setVisible(true);
 	}
 
-	public static void main(String[] args) {
-		System.setProperty("com.apple.macos.useScreenMenuBar", "true");
-		System.setProperty("apple.laf.useScreenMenuBar", "true");
-		// we want to open files by open-clicking in Finder & co.
-		// not tested yet
-		// source:
-		// http://stackoverflow.com/questions/1575190/double-click-document-file-in-mac-os-x-to-open-java-application
-		if (System.getProperty("os.name").contains("OS X")) {
-			Application a = Application.getApplication();
-			a.setOpenFileHandler(new OpenFilesHandler() {
-
-				public void openFiles(OpenFilesEvent e) {
-					for (Object file : e.getFiles()) {
-						if (file instanceof File) {
-							openFiles.add(new XMIViewer((File) file));
-						}
-					}
-				}
-
-			});
-
-			a.setAboutHandler(new AboutHandler() {
-
-				public void handleAbout(AboutEvent e) {
-					for (XMIViewer v : openFiles) {
-						if (v.isActive()) {
-							v.aboutDialog.setVisible(true);
-							break;
-						}
-					}
-				}
-
-			});
-
-			a.setPreferencesHandler(new PreferencesHandler() {
-
-				public void handlePreferences(PreferencesEvent e) {
-					for (XMIViewer v : openFiles) {
-						if (v.isActive()) {
-							v.prefDialog.setVisible(true);
-							break;
-						}
-					}
-				}
-
-			});
-		}
-		if (args.length == 1)
-			new XMIViewer(new File(args[0]));
-		else if (openFiles.isEmpty())
-			new XMIViewer();
+	public void showAbout() {
+		this.aboutDialog.setVisible(true);
 	}
 
 }
