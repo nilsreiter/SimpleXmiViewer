@@ -58,7 +58,9 @@ public class XMIViewer extends JFrame {
 	private static final String HELP_MESSAGE = "Instructions for using Xmi Viewer";
 
 	private static final long serialVersionUID = 1L;
+	@Deprecated
 	private JDialog aboutDialog;
+	@Deprecated
 	private JDialog prefDialog;
 
 	@Deprecated
