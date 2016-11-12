@@ -50,7 +50,7 @@ import com.apple.eawt.AppEvent.AboutEvent;
 import com.apple.eawt.AppEvent.QuitEvent;
 import com.apple.eawt.QuitResponse;
 
-public class XMIViewer extends JFrame {
+public class XmiDocumentWindow extends JFrame {
 
 	private static final String HELP_MESSAGE = "Instructions for using Xmi Viewer";
 
@@ -60,7 +60,7 @@ public class XMIViewer extends JFrame {
 	String titleFeatureName = "de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData:documentTitle";
 
 	@Deprecated
-	static Set<XMIViewer> openFiles = new HashSet<XMIViewer>();
+	static Set<XmiDocumentWindow> openFiles = new HashSet<XmiDocumentWindow>();
 
 	JMenu documentMenu;
 	JMenu recentMenu;
@@ -72,7 +72,7 @@ public class XMIViewer extends JFrame {
 
 	SimpleXmiViewer mainApplication;
 
-	public XMIViewer(SimpleXmiViewer mApplication, File file) {
+	public XmiDocumentWindow(SimpleXmiViewer mApplication, File file) {
 		super(file.getName());
 		mainApplication = mApplication;
 
@@ -141,7 +141,7 @@ public class XMIViewer extends JFrame {
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				mainApplication.close((XMIViewer) e.getSource());
+				mainApplication.close((XmiDocumentWindow) e.getSource());
 			}
 		});
 
@@ -177,21 +177,21 @@ public class XMIViewer extends JFrame {
 		// Event Handlling of "Help" Menu Item
 		helpMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				JOptionPane.showMessageDialog(XMIViewer.this, HELP_MESSAGE, "Annotation Viewer Help",
+				JOptionPane.showMessageDialog(XmiDocumentWindow.this, HELP_MESSAGE, "Annotation Viewer Help",
 						JOptionPane.PLAIN_MESSAGE);
 			}
 		});
 
 		fontSizeDecr.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				int oldSize = XMIViewer.this.viewer.getTextPane().getFont().getSize();
-				XMIViewer.this.viewer.getTextPane().setFont(new Font(Font.SANS_SERIF, Font.PLAIN, oldSize - 1));
+				int oldSize = XmiDocumentWindow.this.viewer.getTextPane().getFont().getSize();
+				XmiDocumentWindow.this.viewer.getTextPane().setFont(new Font(Font.SANS_SERIF, Font.PLAIN, oldSize - 1));
 			}
 		});
 		fontSizeIncr.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				int oldSize = XMIViewer.this.viewer.getTextPane().getFont().getSize();
-				XMIViewer.this.viewer.getTextPane().setFont(new Font(Font.SANS_SERIF, Font.PLAIN, oldSize + 1));
+				int oldSize = XmiDocumentWindow.this.viewer.getTextPane().getFont().getSize();
+				XmiDocumentWindow.this.viewer.getTextPane().setFont(new Font(Font.SANS_SERIF, Font.PLAIN, oldSize + 1));
 			}
 		});
 
@@ -199,7 +199,7 @@ public class XMIViewer extends JFrame {
 
 	}
 
-	public void windowsMenu(Collection<XMIViewer> windows) {
+	public void windowsMenu(Collection<XmiDocumentWindow> windows) {
 		recentMenu.removeAll();
 		for (String r : mainApplication.getRecentFilenames(10)) {
 			final File f = new File(r);
@@ -215,7 +215,7 @@ public class XMIViewer extends JFrame {
 		}
 
 		windowsMenu.removeAll();
-		for (final XMIViewer v : windows) {
+		for (final XmiDocumentWindow v : windows) {
 			JCheckBoxMenuItem item = new JCheckBoxMenuItem(v.getTitle());
 			if (v == this) {
 				item.setSelected(true);
@@ -310,7 +310,7 @@ public class XMIViewer extends JFrame {
 				mItem.addActionListener(new ActionListener() {
 
 					public void actionPerformed(ActionEvent e) {
-						XMIViewer.this.viewer.getTextPane().setCaretPosition(anno.getBegin());
+						XmiDocumentWindow.this.viewer.getTextPane().setCaretPosition(anno.getBegin());
 					}
 
 				});

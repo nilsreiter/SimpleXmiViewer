@@ -29,7 +29,7 @@ import com.apple.eawt.QuitHandler;
 import com.apple.eawt.QuitResponse;
 
 public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFilesHandler, QuitHandler {
-	Set<XMIViewer> openFiles = new HashSet<XMIViewer>();
+	Set<XmiDocumentWindow> openFiles = new HashSet<XmiDocumentWindow>();
 
 	Preferences preferences;
 	JDialog aboutDialog;
@@ -39,7 +39,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 	JFileChooser openDialog;
 
 	public SimpleXmiViewer(String[] args) {
-		preferences = Preferences.userRoot().node(XMIViewer.class.getName());
+		preferences = Preferences.userRoot().node(XmiDocumentWindow.class.getName());
 
 		aboutDialog = new AboutDialog(null, "About Annotation Viewer");
 
@@ -81,7 +81,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 	@Deprecated
 	public JMenu getWindowsMenu() {
 		JMenu menu = new JMenu("Windows");
-		for (final XMIViewer v : openFiles) {
+		for (final XmiDocumentWindow v : openFiles) {
 			JCheckBoxMenuItem item = new JCheckBoxMenuItem(v.getTitle());
 			if (v == getFrontWindow()) {
 				item.setSelected(true);
@@ -96,15 +96,15 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		return menu;
 	}
 
-	private XMIViewer getFrontWindow() {
-		for (XMIViewer v : openFiles)
+	private XmiDocumentWindow getFrontWindow() {
+		for (XmiDocumentWindow v : openFiles)
 			if (v.isActive())
 				return v;
 
 		return null;
 	}
 
-	public void close(XMIViewer viewer) {
+	public void close(XmiDocumentWindow viewer) {
 		openFiles.remove(viewer);
 		updateAllMenus();
 		viewer.dispose();
@@ -112,8 +112,8 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			fileOpenDialog();
 	};
 
-	public synchronized XMIViewer open(final File file) {
-		final XMIViewer v = new XMIViewer(this, file);
+	public synchronized XmiDocumentWindow open(final File file) {
+		final XmiDocumentWindow v = new XmiDocumentWindow(this, file);
 		new Thread() {
 			@Override
 			public void run() {
@@ -145,12 +145,12 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 	}
 
 	public void updateAllMenus() {
-		for (XMIViewer v : openFiles)
+		for (XmiDocumentWindow v : openFiles)
 			v.windowsMenu(openFiles);
 	}
 
 	public void handleQuitRequestWith(QuitEvent e, QuitResponse response) {
-		for (XMIViewer v : openFiles)
+		for (XmiDocumentWindow v : openFiles)
 			this.close(v);
 		System.exit(0);
 	}
