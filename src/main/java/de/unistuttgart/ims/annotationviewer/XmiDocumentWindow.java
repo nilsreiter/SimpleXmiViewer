@@ -54,8 +54,8 @@ public class XmiDocumentWindow extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private MyCASAnnotationViewer viewer = null;
-	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
-	String titleFeatureName = "de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData:documentTitle";
+
+	String segmentAnnotation = null;
 
 	JMenu documentMenu;
 	JMenu recentMenu;
@@ -80,6 +80,8 @@ public class XmiDocumentWindow extends JFrame {
 	public XmiDocumentWindow(SimpleXmiViewer mApplication) {
 		super("XmiDocumentWindow");
 		mainApplication = mApplication;
+
+		segmentAnnotation = mainApplication.getConfiguration().getString("General.segmentAnnotationTop", null);
 
 		initialise();
 	}
@@ -264,9 +266,13 @@ public class XmiDocumentWindow extends JFrame {
 		cas = jcas.getCas();
 
 		try {
-			Feature titleFeature = jcas.getTypeSystem().getFeatureByFullName(titleFeatureName);
-			this.setTitle(
-					jcas.getDocumentAnnotationFs().getFeatureValueAsString(titleFeature) + " (" + file.getName() + ")");
+			Feature titleFeature = jcas.getTypeSystem()
+					.getFeatureByFullName(mainApplication.getConfiguration().getString("General.windowTitleFeature"));
+			if (titleFeature != null)
+				setTitle(jcas.getDocumentAnnotationFs().getFeatureValueAsString(titleFeature) + " (" + file.getName()
+						+ ")");
+			else
+				setTitle("(" + file.getName() + ")");
 		} catch (CASRuntimeException e) {
 
 		}

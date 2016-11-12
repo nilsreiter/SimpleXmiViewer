@@ -3,6 +3,11 @@ package de.unistuttgart.ims.annotationviewer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.prefs.Preferences;
@@ -13,6 +18,12 @@ import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.configuration2.CombinedConfiguration;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.INIConfiguration;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.tree.OverrideCombiner;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.uima.tools.util.gui.AboutDialog;
@@ -32,6 +43,8 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 	Set<XmiDocumentWindow> openFiles = new HashSet<XmiDocumentWindow>();
 
 	Preferences preferences;
+	Configuration configuration;
+
 	JDialog aboutDialog;
 
 	JDialog prefDialog;
@@ -40,6 +53,48 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 
 	public SimpleXmiViewer(String[] args) {
 		preferences = Preferences.userRoot().node(XmiDocumentWindow.class.getName());
+
+		INIConfiguration defaultConfig = new INIConfiguration();
+		INIConfiguration userConfig = new INIConfiguration();
+
+		InputStream is = null;
+		try {
+			// reading of default properties from inside the war
+			is = getClass().getResourceAsStream("/default-config.ini");
+			if (is != null) {
+				defaultConfig.read(new InputStreamReader(is, "UTF-8"));
+				// defaults.load();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			IOUtils.closeQuietly(is);
+		}
+
+		try {
+			File homeDirectory = new File(System.getProperty("user.home"));
+			File userConfigFile = new File(homeDirectory, ".SimpleXmiViewer.ini");
+			if (userConfigFile.exists())
+				userConfig.read(new FileReader(userConfigFile));
+			else
+				userConfigFile.createNewFile();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		CombinedConfiguration config = new CombinedConfiguration(new OverrideCombiner());
+		config.addConfiguration(userConfig);
+		config.addConfiguration(defaultConfig);
+		configuration = config;
+
+		/*
+		 * Iterator<String> it = config.getKeys(); while (it.hasNext()) {
+		 * System.err.println(it.next()); }
+		 */
 
 		aboutDialog = new AboutDialog(null, "About Annotation Viewer");
 
@@ -69,6 +124,10 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			open(new File(args[0]));
 		} else if (openFiles.isEmpty())
 			this.fileOpenDialog();
+	}
+
+	public Configuration getConfiguration() {
+		return configuration;
 	}
 
 	public static void main(String[] args) {
