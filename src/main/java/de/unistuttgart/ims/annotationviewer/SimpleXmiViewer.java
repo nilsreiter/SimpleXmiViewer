@@ -28,7 +28,7 @@ import com.apple.eawt.PreferencesHandler;
 import com.apple.eawt.QuitHandler;
 import com.apple.eawt.QuitResponse;
 
-public class MainApplication implements AboutHandler, PreferencesHandler, OpenFilesHandler, QuitHandler {
+public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFilesHandler, QuitHandler {
 	Set<XMIViewer> openFiles = new HashSet<XMIViewer>();
 
 	Preferences preferences;
@@ -38,7 +38,7 @@ public class MainApplication implements AboutHandler, PreferencesHandler, OpenFi
 
 	JFileChooser openDialog;
 
-	public MainApplication(String[] args) {
+	public SimpleXmiViewer(String[] args) {
 		preferences = Preferences.userRoot().node(XMIViewer.class.getName());
 
 		aboutDialog = new AboutDialog(null, "About Annotation Viewer");
@@ -75,7 +75,7 @@ public class MainApplication implements AboutHandler, PreferencesHandler, OpenFi
 		System.setProperty("com.apple.macos.useScreenMenuBar", "true");
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
 
-		new MainApplication(args);
+		new SimpleXmiViewer(args);
 	}
 
 	@Deprecated

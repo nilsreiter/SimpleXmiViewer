@@ -70,9 +70,9 @@ public class XMIViewer extends JFrame {
 
 	private JMenuBar menuBar = new JMenuBar();
 
-	MainApplication mainApplication;
+	SimpleXmiViewer mainApplication;
 
-	public XMIViewer(MainApplication mApplication, File file) {
+	public XMIViewer(SimpleXmiViewer mApplication, File file) {
 		super(file.getName());
 		mainApplication = mApplication;
 
