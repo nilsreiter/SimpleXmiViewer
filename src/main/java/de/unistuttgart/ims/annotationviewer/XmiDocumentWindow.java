@@ -61,14 +61,24 @@ public class XmiDocumentWindow extends JFrame {
 	JMenu recentMenu;
 	JMenu windowsMenu;
 
+	boolean showTreeView = false;
+
+	public boolean isShowTreeView() {
+		return showTreeView;
+	}
+
+	public void setShowTreeView(boolean showTreeView) {
+		this.showTreeView = showTreeView;
+	}
+
 	static Logger logger = Logger.getAnonymousLogger();
 
 	private JMenuBar menuBar = new JMenuBar();
 
 	SimpleXmiViewer mainApplication;
 
-	public XmiDocumentWindow(SimpleXmiViewer mApplication, File file) {
-		super(file.getName());
+	public XmiDocumentWindow(SimpleXmiViewer mApplication) {
+		super("XmiDocumentWindow");
 		mainApplication = mApplication;
 
 		initialise();
@@ -265,7 +275,7 @@ public class XmiDocumentWindow extends JFrame {
 		viewer.setCAS(cas);
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.add("Viewer", viewer);
-		if (false)
+		if (isShowTreeView())
 			try {
 				tabbedPane.add("Tree", new CasTreeViewer(cas));
 			} catch (CASException e) {

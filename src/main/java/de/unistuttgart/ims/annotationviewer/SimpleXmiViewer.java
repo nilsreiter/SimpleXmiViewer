@@ -113,7 +113,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 	};
 
 	public synchronized XmiDocumentWindow open(final File file) {
-		final XmiDocumentWindow v = new XmiDocumentWindow(this, file);
+		final XmiDocumentWindow v = new XmiDocumentWindow(this);
 		new Thread() {
 			@Override
 			public void run() {
