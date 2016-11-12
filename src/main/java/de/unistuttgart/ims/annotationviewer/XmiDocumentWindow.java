@@ -12,12 +12,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -58,9 +56,6 @@ public class XmiDocumentWindow extends JFrame {
 	private MyCASAnnotationViewer viewer = null;
 	String segmentAnnotation = "de.unistuttgart.ims.drama.api.DramaSegment";
 	String titleFeatureName = "de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData:documentTitle";
-
-	@Deprecated
-	static Set<XmiDocumentWindow> openFiles = new HashSet<XmiDocumentWindow>();
 
 	JMenu documentMenu;
 	JMenu recentMenu;
