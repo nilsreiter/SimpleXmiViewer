@@ -270,8 +270,12 @@ public class XmiDocumentWindow extends JFrame {
 			Feature titleFeature = jcas.getTypeSystem()
 					.getFeatureByFullName(mainApplication.getConfiguration().getString("General.windowTitleFeature"));
 			if (titleFeature != null)
-				setTitle(jcas.getDocumentAnnotationFs().getFeatureValueAsString(titleFeature)
-						+ (windowTitle != null ? " (" + windowTitle + ")" : ""));
+				try {
+					setTitle(jcas.getDocumentAnnotationFs().getFeatureValueAsString(titleFeature)
+							+ (windowTitle != null ? " (" + windowTitle + ")" : ""));
+				} catch (Exception e) {
+					setTitle((windowTitle != null ? " (" + windowTitle + ")" : ""));
+				}
 			else
 				setTitle((windowTitle != null ? " (" + windowTitle + ")" : ""));
 		} catch (CASRuntimeException e) {

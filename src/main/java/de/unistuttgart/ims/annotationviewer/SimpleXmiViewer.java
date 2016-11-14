@@ -13,11 +13,11 @@ import java.io.InputStreamReader;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
@@ -28,7 +28,6 @@ import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.configuration2.CombinedConfiguration;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
@@ -68,6 +67,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 
 	JFileChooser openDialog;
 
+	Set<URI> typeSystemLocations = new HashSet<URI>();
 	TypeSystemDescription typeSystemDescription = null;
 
 	public SimpleXmiViewer(String[] args) {
@@ -133,6 +133,16 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			}
 		});
 
+		for (Object s : configuration.getList("General.typeSystems", new ArrayList<Object>())) {
+			try {
+				loadTypeSystem(new URI(s.toString()));
+			} catch (ResourceInitializationException e) {
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
+		}
+
 		if (System.getProperty("os.name").contains("OS X")) {
 			Application a = Application.getApplication();
 			a.setOpenFileHandler(this);
@@ -150,12 +160,11 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		if (typeSystemDescription == null)
 			typeSystemDescription = TypeSystemDescriptionFactory.createTypeSystemDescriptionFromPath(file.toString());
 		else
-			CasCreationUtils.mergeTypeSystems(Arrays.asList(typeSystemDescription,
+			typeSystemDescription = CasCreationUtils.mergeTypeSystems(Arrays.asList(typeSystemDescription,
 					TypeSystemDescriptionFactory.createTypeSystemDescriptionFromPath(file.toString())));
 
-		List<Object> tsList = ListUtils.union(
-				getConfiguration().getList("General.typeSystems", new LinkedList<Object>()), Arrays.asList(file));
-		getConfiguration().setProperty("General.typeSystems", tsList);
+		typeSystemLocations.add(file);
+		getConfiguration().setProperty("General.typeSystems", new ArrayList<URI>(typeSystemLocations));
 		savePreferences();
 
 	}
