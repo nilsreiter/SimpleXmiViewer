@@ -27,7 +27,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>de.unistuttgart.ims.annotationviewer.XMIViewer</mainClass>
+							<mainClass>de.unistuttgart.ims.annotationviewer.SimpleXmiViewer</mainClass>
 							<addClasspath>true</addClasspath>
 						</manifest>
 					</archive>
@@ -46,7 +46,7 @@
 				<artifactId>appbundle-maven-plugin</artifactId>
 				<version>1.2.0</version>
 				<configuration>
-					<mainClass>de.unistuttgart.ims.annotationviewer.XMIViewer</mainClass>
+					<mainClass>de.unistuttgart.ims.annotationviewer.SimpleXmiViewer</mainClass>
 					<dictionaryFile>MyInfo.plist</dictionaryFile>
 					<bundleName>${project.name}</bundleName>
 					<buildDirectory>${project.build.directory}</buildDirectory>
