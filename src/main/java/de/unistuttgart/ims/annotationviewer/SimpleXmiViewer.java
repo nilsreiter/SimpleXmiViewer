@@ -6,13 +6,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Writer;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
@@ -23,10 +28,13 @@ import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.configuration2.CombinedConfiguration;
 import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.INIConfiguration;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.configuration2.tree.OverrideCombiner;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -137,14 +145,35 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			this.fileOpenDialog();
 	}
 
-	public void loadTypeSystem(File file) throws ResourceInitializationException {
+	public void loadTypeSystem(URI file) throws ResourceInitializationException {
 
 		if (typeSystemDescription == null)
-			typeSystemDescription = TypeSystemDescriptionFactory
-					.createTypeSystemDescriptionFromPath(file.toURI().toString());
+			typeSystemDescription = TypeSystemDescriptionFactory.createTypeSystemDescriptionFromPath(file.toString());
 		else
 			CasCreationUtils.mergeTypeSystems(Arrays.asList(typeSystemDescription,
-					TypeSystemDescriptionFactory.createTypeSystemDescriptionFromPath(file.toURI().toString())));
+					TypeSystemDescriptionFactory.createTypeSystemDescriptionFromPath(file.toString())));
+
+		List<Object> tsList = ListUtils.union(
+				getConfiguration().getList("General.typeSystems", new LinkedList<Object>()), Arrays.asList(file));
+		getConfiguration().setProperty("General.typeSystems", tsList);
+		savePreferences();
+
+	}
+
+	public synchronized void savePreferences() {
+		try {
+			INIConfiguration icfg = new INIConfiguration((HierarchicalConfiguration<ImmutableNode>) getConfiguration());
+			Writer w = new FileWriter(new File(new File(System.getProperty("user.home")), ".SimpleXmiViewer.ini"));
+			icfg.write(w);
+			w.flush();
+			w.close();
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public Configuration getConfiguration() {
@@ -215,7 +244,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 
 		if (tsdFile.exists() && tsdFile.canRead())
 			try {
-				loadTypeSystem(tsdFile);
+				loadTypeSystem(tsdFile.toURI());
 			} catch (ResourceInitializationException e) {
 				e.printStackTrace();
 				return null;
