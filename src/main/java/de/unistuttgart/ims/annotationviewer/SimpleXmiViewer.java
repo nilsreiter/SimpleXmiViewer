@@ -26,6 +26,8 @@ import org.apache.commons.configuration2.tree.OverrideCombiner;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
+import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.apache.uima.tools.util.gui.AboutDialog;
 
 import com.apple.eawt.AboutHandler;
@@ -176,7 +178,14 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		new Thread() {
 			@Override
 			public void run() {
-				v.loadFile(file);
+				File dir = file.getParentFile();
+				File tsdFile = new File(dir, "typesystem.xml");
+				if (!(tsdFile.exists() && tsdFile.canRead())) {
+					return;
+				}
+				TypeSystemDescription tsd = TypeSystemDescriptionFactory
+						.createTypeSystemDescriptionFromPath(tsdFile.toURI().toString());
+				v.loadFile(file, tsd);
 			}
 		}.run();
 		openFiles.add(v);

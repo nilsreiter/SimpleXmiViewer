@@ -37,7 +37,6 @@ import org.apache.uima.cas.Feature;
 import org.apache.uima.cas.impl.XmiCasDeserializer;
 import org.apache.uima.cas.text.AnnotationIndex;
 import org.apache.uima.fit.factory.JCasFactory;
-import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
@@ -236,20 +235,12 @@ public class XmiDocumentWindow extends JFrame {
 		}
 	}
 
-	public void loadFile(File file) {
+	public void loadFile(File file, TypeSystemDescription typeSystemDescription) {
 		// load type system and CAS
-		TypeSystemDescription tsd;
 		CAS cas = null;
-		File dir = file.getParentFile();
-		File tsdFile = new File(dir, "typesystem.xml");
-		if (!(tsdFile.exists() && tsdFile.canRead())) {
-			this.closeWindow(false);
-			return;
-		}
-		tsd = TypeSystemDescriptionFactory.createTypeSystemDescriptionFromPath(tsdFile.toURI().toString());
 		JCas jcas = null;
 		try {
-			jcas = JCasFactory.createJCas(tsd);
+			jcas = JCasFactory.createJCas(typeSystemDescription);
 		} catch (UIMAException e1) {
 			e1.printStackTrace();
 			System.exit(1);
