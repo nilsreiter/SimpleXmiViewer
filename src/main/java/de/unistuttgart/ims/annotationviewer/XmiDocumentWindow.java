@@ -8,8 +8,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -109,6 +109,7 @@ public class XmiDocumentWindow extends JFrame {
 		JMenuItem helpMenuItem = new JMenuItem("Help");
 		JMenuItem exitMenuItem = new JMenuItem("Quit");
 		JMenuItem openMenuItem = new JMenuItem("Open...");
+		JMenuItem openUrlMenuItem = new JMenuItem("Open URL...");
 		recentMenu = new JMenu("Open Recent");
 		openMenuItem.setAccelerator(
 				KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -123,6 +124,7 @@ public class XmiDocumentWindow extends JFrame {
 				KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
 		fileMenu.add(openMenuItem);
+		fileMenu.add(openUrlMenuItem);
 		fileMenu.add(recentMenu);
 		fileMenu.addSeparator();
 		fileMenu.add(closeMenuItem);
@@ -171,6 +173,14 @@ public class XmiDocumentWindow extends JFrame {
 			public void actionPerformed(ActionEvent ae) {
 				mainApplication.fileOpenDialog();
 			}
+		});
+
+		openUrlMenuItem.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				mainApplication.urlOpenDialog();
+			}
+
 		});
 
 		// Event Handlling of "About" Menu Item
@@ -235,7 +245,7 @@ public class XmiDocumentWindow extends JFrame {
 		}
 	}
 
-	public void loadFile(File file, TypeSystemDescription typeSystemDescription) {
+	public void loadFile(InputStream inputStream, TypeSystemDescription typeSystemDescription, String windowTitle) {
 		// load type system and CAS
 		CAS cas = null;
 		JCas jcas = null;
@@ -246,7 +256,7 @@ public class XmiDocumentWindow extends JFrame {
 			System.exit(1);
 		}
 		try {
-			XmiCasDeserializer.deserialize(new FileInputStream(file), jcas.getCas(), true);
+			XmiCasDeserializer.deserialize(inputStream, jcas.getCas(), true);
 		} catch (SAXException e1) {
 			e1.printStackTrace();
 			System.exit(1);
@@ -260,10 +270,10 @@ public class XmiDocumentWindow extends JFrame {
 			Feature titleFeature = jcas.getTypeSystem()
 					.getFeatureByFullName(mainApplication.getConfiguration().getString("General.windowTitleFeature"));
 			if (titleFeature != null)
-				setTitle(jcas.getDocumentAnnotationFs().getFeatureValueAsString(titleFeature) + " (" + file.getName()
-						+ ")");
+				setTitle(jcas.getDocumentAnnotationFs().getFeatureValueAsString(titleFeature)
+						+ (windowTitle != null ? " (" + windowTitle + ")" : ""));
 			else
-				setTitle("(" + file.getName() + ")");
+				setTitle((windowTitle != null ? " (" + windowTitle + ")" : ""));
 		} catch (CASRuntimeException e) {
 
 		}

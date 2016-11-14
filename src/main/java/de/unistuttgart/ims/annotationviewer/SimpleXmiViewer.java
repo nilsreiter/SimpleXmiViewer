@@ -3,11 +3,15 @@ package de.unistuttgart.ims.annotationviewer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.prefs.Preferences;
@@ -16,6 +20,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
 import org.apache.commons.configuration2.CombinedConfiguration;
@@ -27,8 +32,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
+import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.apache.uima.tools.util.gui.AboutDialog;
+import org.apache.uima.util.CasCreationUtils;
 
 import com.apple.eawt.AboutHandler;
 import com.apple.eawt.AppEvent.AboutEvent;
@@ -52,6 +59,8 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 	JDialog prefDialog;
 
 	JFileChooser openDialog;
+
+	TypeSystemDescription typeSystemDescription = null;
 
 	public SimpleXmiViewer(String[] args) {
 		preferences = Preferences.userRoot().node(XmiDocumentWindow.class.getName());
@@ -128,6 +137,16 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			this.fileOpenDialog();
 	}
 
+	public void loadTypeSystem(File file) throws ResourceInitializationException {
+
+		if (typeSystemDescription == null)
+			typeSystemDescription = TypeSystemDescriptionFactory
+					.createTypeSystemDescriptionFromPath(file.toURI().toString());
+		else
+			CasCreationUtils.mergeTypeSystems(Arrays.asList(typeSystemDescription,
+					TypeSystemDescriptionFactory.createTypeSystemDescriptionFromPath(file.toURI().toString())));
+	}
+
 	public Configuration getConfiguration() {
 		return configuration;
 	}
@@ -173,19 +192,43 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			fileOpenDialog();
 	};
 
-	public synchronized XmiDocumentWindow open(final File file) {
+	public synchronized XmiDocumentWindow open(final URL url) {
 		final XmiDocumentWindow v = new XmiDocumentWindow(this);
 		new Thread() {
 			@Override
 			public void run() {
-				File dir = file.getParentFile();
-				File tsdFile = new File(dir, "typesystem.xml");
-				if (!(tsdFile.exists() && tsdFile.canRead())) {
-					return;
+				try {
+					v.loadFile(url.openStream(), typeSystemDescription, null);
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-				TypeSystemDescription tsd = TypeSystemDescriptionFactory
-						.createTypeSystemDescriptionFromPath(tsdFile.toURI().toString());
-				v.loadFile(file, tsd);
+			}
+		}.run();
+		return v;
+	}
+
+	public synchronized XmiDocumentWindow open(final File file) {
+		final XmiDocumentWindow v = new XmiDocumentWindow(this);
+
+		File dir = file.getParentFile();
+		File tsdFile = new File(dir, "typesystem.xml");
+
+		if (tsdFile.exists() && tsdFile.canRead())
+			try {
+				loadTypeSystem(tsdFile);
+			} catch (ResourceInitializationException e) {
+				e.printStackTrace();
+				return null;
+			}
+
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					v.loadFile(new FileInputStream(file), typeSystemDescription, file.getName());
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
 			}
 		}.run();
 		openFiles.add(v);
@@ -234,6 +277,17 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 
 	public String[] getRecentFilenames(int n) {
 		return (String[]) ArrayUtils.subarray(preferences.get("recents", "").split(File.pathSeparator), 0, n);
+	}
+
+	public void urlOpenDialog() {
+		String s = (String) JOptionPane.showInputDialog(null, "URL:\n", "Customized Dialog", JOptionPane.PLAIN_MESSAGE,
+				null, null, "");
+		try {
+			URL url = new URL(s);
+			open(url);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void fileOpenDialog() {
