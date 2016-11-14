@@ -171,6 +171,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 
 	public synchronized void savePreferences() {
 		try {
+			@SuppressWarnings("unchecked")
 			INIConfiguration icfg = new INIConfiguration((HierarchicalConfiguration<ImmutableNode>) getConfiguration());
 			Writer w = new FileWriter(new File(new File(System.getProperty("user.home")), ".SimpleXmiViewer.ini"));
 			icfg.write(w);
@@ -248,17 +249,17 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 	public synchronized XmiDocumentWindow open(final File file) {
 		final XmiDocumentWindow v = new XmiDocumentWindow(this);
 
-		File dir = file.getParentFile();
-		File tsdFile = new File(dir, "typesystem.xml");
+		if (configuration.getBoolean("General.typeSystemAutoLoad", false)) {
+			File tsdFile = new File(file.getParentFile(), "typesystem.xml");
 
-		if (tsdFile.exists() && tsdFile.canRead())
-			try {
-				loadTypeSystem(tsdFile.toURI());
-			} catch (ResourceInitializationException e) {
-				e.printStackTrace();
-				return null;
-			}
-
+			if (tsdFile.exists() && tsdFile.canRead())
+				try {
+					loadTypeSystem(tsdFile.toURI());
+				} catch (ResourceInitializationException e) {
+					e.printStackTrace();
+					return null;
+				}
+		}
 		new Thread() {
 			@Override
 			public void run() {
