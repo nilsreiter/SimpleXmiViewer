@@ -54,7 +54,11 @@ public class XmiDocumentWindow extends JFrame {
 	private static final String HELP_MESSAGE = "Instructions for using Xmi Viewer";
 
 	private static final long serialVersionUID = 1L;
-	private MyCASAnnotationViewer viewer = null;
+	MyCASAnnotationViewer viewer = null;
+
+	public MyCASAnnotationViewer getViewer() {
+		return viewer;
+	}
 
 	String segmentAnnotation = null;
 
@@ -98,14 +102,17 @@ public class XmiDocumentWindow extends JFrame {
 			logger.severe("Could not set look and feel: " + e.getMessage());
 		}
 
+		// top level menus
 		JMenu fileMenu = new JMenu("File");
 		JMenu helpMenu = new JMenu("Help");
 		JMenu viewMenu = new JMenu("View");
+		JMenu toolsMenu = new JMenu("Tools");
 		windowsMenu = new JMenu("Windows");
 		if (segmentAnnotation != null) {
 			documentMenu = new JMenu("Document");
 			documentMenu.setEnabled(segmentAnnotation != null);
 		}
+
 		// Menu Items
 		JMenuItem aboutMenuItem = new JMenuItem("About");
 		JMenuItem helpMenuItem = new JMenuItem("Help");
@@ -130,8 +137,11 @@ public class XmiDocumentWindow extends JFrame {
 		helpMenu.add(aboutMenuItem);
 		helpMenu.add(helpMenuItem);
 
+		toolsMenu.add(new ShowSearchPanelAction());
+
 		menuBar.add(fileMenu);
 		menuBar.add(viewMenu);
+		menuBar.add(toolsMenu);
 		if (segmentAnnotation != null)
 			menuBar.add(documentMenu);
 		menuBar.add(windowsMenu);
@@ -303,6 +313,23 @@ public class XmiDocumentWindow extends JFrame {
 			documentMenu.add(typeMenu);
 		}
 		documentMenu.validate();
+
+	}
+
+	class ShowSearchPanelAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+
+		public ShowSearchPanelAction() {
+			super();
+			putValue(Action.NAME, "Search");
+			putValue(Action.ACCELERATOR_KEY,
+					KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			new SearchPanel(XmiDocumentWindow.this, mainApplication.getConfiguration()).setVisible(true);
+		}
 
 	}
 
