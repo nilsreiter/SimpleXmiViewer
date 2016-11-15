@@ -1,7 +1,9 @@
 package de.unistuttgart.ims.annotationviewer;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,11 +23,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 
 import org.apache.commons.configuration2.CombinedConfiguration;
@@ -336,5 +341,49 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			open(openDialog.getSelectedFile());
 			break;
 		}
+	}
+
+	static class FileOpenURLAction extends XmiViewerAction {
+
+		private static final long serialVersionUID = 1L;
+
+		public FileOpenURLAction(SimpleXmiViewer mApplication) {
+			super(mApplication);
+			putValue(Action.NAME, "Open URL");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			mainApplication.urlOpenDialog();
+		}
+
+	}
+
+	static class LoadTypeSystemAction extends AbstractAction {
+		private static final long serialVersionUID = 1L;
+
+		public LoadTypeSystemAction() {
+			super("Load type system ...");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+		}
+	}
+
+	static class FileOpenAction extends XmiViewerAction {
+
+		private static final long serialVersionUID = 1L;
+
+		public FileOpenAction(SimpleXmiViewer mApplication) {
+			super(mApplication);
+			putValue(Action.NAME, "Open");
+			putValue(Action.ACCELERATOR_KEY,
+					KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			mainApplication.fileOpenDialog();
+		}
+
 	}
 }

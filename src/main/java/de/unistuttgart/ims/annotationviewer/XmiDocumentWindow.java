@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -108,30 +110,22 @@ public class XmiDocumentWindow extends JFrame {
 		JMenuItem aboutMenuItem = new JMenuItem("About");
 		JMenuItem helpMenuItem = new JMenuItem("Help");
 		JMenuItem exitMenuItem = new JMenuItem("Quit");
-		JMenuItem openMenuItem = new JMenuItem("Open...");
-		JMenuItem openUrlMenuItem = new JMenuItem("Open URL...");
 		recentMenu = new JMenu("Open Recent");
-		openMenuItem.setAccelerator(
-				KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		JMenuItem closeMenuItem = new JMenuItem("Close");
 		closeMenuItem.setAccelerator(
 				KeyStroke.getKeyStroke(KeyEvent.VK_W, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-		JMenuItem fontSizeIncr = new JMenuItem("Bigger");
-		fontSizeIncr.setAccelerator(
-				KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-		JMenuItem fontSizeDecr = new JMenuItem("Smaller");
-		fontSizeDecr.setAccelerator(
-				KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
-		fileMenu.add(openMenuItem);
-		fileMenu.add(openUrlMenuItem);
+		fileMenu.add(new SimpleXmiViewer.FileOpenAction(mainApplication));
+		fileMenu.add(new SimpleXmiViewer.FileOpenURLAction(mainApplication));
 		fileMenu.add(recentMenu);
+		fileMenu.addSeparator();
+		fileMenu.add(new SimpleXmiViewer.LoadTypeSystemAction());
 		fileMenu.addSeparator();
 		fileMenu.add(closeMenuItem);
 		fileMenu.addSeparator();
 		fileMenu.add(exitMenuItem);
-		viewMenu.add(fontSizeIncr);
-		viewMenu.add(fontSizeDecr);
+		viewMenu.add(new ViewFontSizeDecreaseAction());
+		viewMenu.add(new ViewFontSizeIncreaseAction());
 
 		helpMenu.add(aboutMenuItem);
 		helpMenu.add(helpMenuItem);
@@ -168,21 +162,6 @@ public class XmiDocumentWindow extends JFrame {
 			}
 		});
 
-		// Event Handlling of "Open" Menu Item
-		openMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				mainApplication.fileOpenDialog();
-			}
-		});
-
-		openUrlMenuItem.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				mainApplication.urlOpenDialog();
-			}
-
-		});
-
 		// Event Handlling of "About" Menu Item
 		aboutMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -195,19 +174,6 @@ public class XmiDocumentWindow extends JFrame {
 			public void actionPerformed(ActionEvent ae) {
 				JOptionPane.showMessageDialog(XmiDocumentWindow.this, HELP_MESSAGE, "Annotation Viewer Help",
 						JOptionPane.PLAIN_MESSAGE);
-			}
-		});
-
-		fontSizeDecr.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				int oldSize = XmiDocumentWindow.this.viewer.getTextPane().getFont().getSize();
-				XmiDocumentWindow.this.viewer.getTextPane().setFont(new Font(Font.SANS_SERIF, Font.PLAIN, oldSize - 1));
-			}
-		});
-		fontSizeIncr.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				int oldSize = XmiDocumentWindow.this.viewer.getTextPane().getFont().getSize();
-				XmiDocumentWindow.this.viewer.getTextPane().setFont(new Font(Font.SANS_SERIF, Font.PLAIN, oldSize + 1));
 			}
 		});
 
@@ -237,9 +203,11 @@ public class XmiDocumentWindow extends JFrame {
 				item.setSelected(true);
 			} else
 				item.addActionListener(new ActionListener() {
+
 					public void actionPerformed(ActionEvent e) {
 						v.toFront();
 					}
+
 				});
 			windowsMenu.add(item);
 		}
@@ -338,4 +306,41 @@ public class XmiDocumentWindow extends JFrame {
 
 	}
 
+	class ViewFontSizeIncreaseAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+
+		public ViewFontSizeIncreaseAction() {
+			super();
+			putValue(Action.NAME, "Increase Font Size");
+			putValue(Action.ACCELERATOR_KEY,
+					KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			int oldSize = XmiDocumentWindow.this.viewer.getTextPane().getFont().getSize();
+			XmiDocumentWindow.this.viewer.getTextPane().setFont(new Font(Font.SANS_SERIF, Font.PLAIN, oldSize + 1));
+
+		}
+
+	}
+
+	class ViewFontSizeDecreaseAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+
+		public ViewFontSizeDecreaseAction() {
+			super();
+			putValue(Action.NAME, "Decrease Font Size");
+			putValue(Action.ACCELERATOR_KEY,
+					KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			int oldSize = XmiDocumentWindow.this.viewer.getTextPane().getFont().getSize();
+			XmiDocumentWindow.this.viewer.getTextPane().setFont(new Font(Font.SANS_SERIF, Font.PLAIN, oldSize - 1));
+
+		}
+
+	}
 }

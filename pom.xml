@@ -12,6 +12,7 @@
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<version.dkpro>1.8.0</version.dkpro>
 	</properties>
 	<build>
 		<plugins>
@@ -27,7 +28,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>de.unistuttgart.ims.annotationviewer.XMIViewer</mainClass>
+							<mainClass>de.unistuttgart.ims.annotationviewer.SimpleXmiViewer</mainClass>
 							<addClasspath>true</addClasspath>
 						</manifest>
 					</archive>
@@ -46,7 +47,7 @@
 				<artifactId>appbundle-maven-plugin</artifactId>
 				<version>1.2.0</version>
 				<configuration>
-					<mainClass>de.unistuttgart.ims.annotationviewer.XMIViewer</mainClass>
+					<mainClass>de.unistuttgart.ims.annotationviewer.SimpleXmiViewer</mainClass>
 					<dictionaryFile>MyInfo.plist</dictionaryFile>
 					<bundleName>${project.name}</bundleName>
 					<buildDirectory>${project.build.directory}</buildDirectory>
@@ -89,6 +90,41 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+			<artifactId>
+				de.tudarmstadt.ukp.dkpro.core.api.metadata-asl
+			</artifactId>
+			<version>${version.dkpro}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+			<artifactId>
+				de.tudarmstadt.ukp.dkpro.core.api.segmentation-asl
+			</artifactId>
+			<version>${version.dkpro}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+			<artifactId>
+				de.tudarmstadt.ukp.dkpro.core.api.lexmorph-asl
+			</artifactId>
+			<version>${version.dkpro}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+			<artifactId>
+				de.tudarmstadt.ukp.dkpro.core.api.syntax-asl
+			</artifactId>
+			<version>${version.dkpro}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+			<artifactId>
+				de.tudarmstadt.ukp.dkpro.core.api.semantics-asl
+			</artifactId>
+			<version>${version.dkpro}</version>
 		</dependency>
 	</dependencies>
 </project>
