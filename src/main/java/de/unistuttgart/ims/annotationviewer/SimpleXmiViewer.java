@@ -254,7 +254,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 	public synchronized XmiDocumentWindow open(final File file) {
 		final XmiDocumentWindow v = new XmiDocumentWindow(this);
 
-		if (configuration.getBoolean("General.typeSystemAutoLoad", false)) {
+		if (configuration.getBoolean("General.typeSystemAutoLoad", true)) {
 			File tsdFile = new File(file.getParentFile(), "typesystem.xml");
 
 			if (tsdFile.exists() && tsdFile.canRead())
