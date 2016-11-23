@@ -125,6 +125,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		prefDialog = new PreferencesDialog(null, preferences);
 
 		openDialog = new JFileChooser();
+		openDialog.setMultiSelectionEnabled(true);
 		openDialog.setFileFilter(new FileFilter() {
 
 			@Override
@@ -338,7 +339,9 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		int r = openDialog.showOpenDialog(null);
 		switch (r) {
 		case JFileChooser.APPROVE_OPTION:
-			open(openDialog.getSelectedFile());
+			for (File f : openDialog.getSelectedFiles()) {
+				open(f);
+			}
 			break;
 		}
 	}
