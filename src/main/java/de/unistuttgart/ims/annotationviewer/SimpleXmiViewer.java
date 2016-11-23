@@ -343,6 +343,9 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 				open(f);
 			}
 			break;
+		default:
+			if (openFiles.isEmpty())
+				handleQuitRequestWith(null, null);
 		}
 	}
 
