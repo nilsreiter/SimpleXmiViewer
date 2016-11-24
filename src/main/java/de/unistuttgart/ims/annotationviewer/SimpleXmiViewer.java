@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
@@ -325,8 +324,8 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 	}
 
 	public void urlOpenDialog() {
-		String s = (String) JOptionPane.showInputDialog(null, "URL:\n", "Customized Dialog", JOptionPane.PLAIN_MESSAGE,
-				null, null, "");
+		String s = (String) JOptionPane.showInputDialog(null, "URL:\n", "Load XMI file by URL",
+				JOptionPane.PLAIN_MESSAGE, null, null, "");
 		try {
 			URL url = new URL(s);
 			open(url);
@@ -364,14 +363,28 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 
 	}
 
-	static class LoadTypeSystemAction extends AbstractAction {
+	static class LoadTypeSystemAction extends XmiViewerAction {
 		private static final long serialVersionUID = 1L;
 
-		public LoadTypeSystemAction() {
-			super("Load type system ...");
+		public LoadTypeSystemAction(SimpleXmiViewer mainApplication) {
+			super(mainApplication);
+			putValue(Action.NAME, "Load type system ...");
+
 		}
 
 		public void actionPerformed(ActionEvent e) {
+			String s = (String) JOptionPane.showInputDialog(null, "URL:\n", "Load type system by URI",
+					JOptionPane.PLAIN_MESSAGE, null, null, "");
+			try {
+				URI url = new URI(s);
+				mainApplication.loadTypeSystem(url);
+			} catch (ResourceInitializationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (URISyntaxException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
 		}
 	}

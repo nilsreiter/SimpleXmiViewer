@@ -126,7 +126,7 @@ public class XmiDocumentWindow extends JFrame {
 		fileMenu.add(new SimpleXmiViewer.FileOpenURLAction(mainApplication));
 		fileMenu.add(recentMenu);
 		fileMenu.addSeparator();
-		fileMenu.add(new SimpleXmiViewer.LoadTypeSystemAction());
+		fileMenu.add(new SimpleXmiViewer.LoadTypeSystemAction(mainApplication));
 		fileMenu.addSeparator();
 		fileMenu.add(closeMenuItem);
 		fileMenu.addSeparator();
