@@ -91,27 +91,33 @@ public class SearchPanel extends JFrame implements DocumentListener, ListSelecti
 		return searchPanel;
 	}
 
+	@Override
 	public void insertUpdate(DocumentEvent e) {
 		try {
 			Pattern.compile(textField.getText());
 			search(textField.getText());
 		} catch (PatternSyntaxException ex) {
+			SimpleXmiViewer.logger.trace(ex.getMessage());
 		}
 	}
 
+	@Override
 	public void removeUpdate(DocumentEvent e) {
 		try {
 			Pattern.compile(textField.getText());
 			search(textField.getText());
 		} catch (PatternSyntaxException ex) {
+			SimpleXmiViewer.logger.trace(ex.getMessage());
 		}
 	}
 
+	@Override
 	public void changedUpdate(DocumentEvent e) {
 		try {
 			Pattern.compile(textField.getText());
 			search(textField.getText());
 		} catch (PatternSyntaxException ex) {
+			SimpleXmiViewer.logger.trace(ex.getMessage());
 		}
 	}
 
@@ -147,6 +153,7 @@ public class SearchPanel extends JFrame implements DocumentListener, ListSelecti
 		pack();
 	}
 
+	@Override
 	public void valueChanged(ListSelectionEvent e) {
 
 		SearchResult result = lm.getElementAt(((ListSelectionModel) e.getSource()).getMinSelectionIndex());
@@ -186,6 +193,7 @@ public class SearchPanel extends JFrame implements DocumentListener, ListSelecti
 			centerFont = new Font(Font.SANS_SERIF, Font.BOLD, 13);
 		}
 
+		@Override
 		public Component getListCellRendererComponent(JList<? extends SearchResult> list, SearchResult value, int index,
 				boolean isSelected, boolean cellHasFocus) {
 
@@ -224,6 +232,7 @@ public class SearchPanel extends JFrame implements DocumentListener, ListSelecti
 			counter = c;
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			String[] keys = counter.keySet().toArray(new String[counter.keySet().size()]);
 			double[] values = new double[keys.length];
@@ -241,10 +250,12 @@ public class SearchPanel extends JFrame implements DocumentListener, ListSelecti
 		}
 	}
 
+	@Override
 	public void windowOpened(WindowEvent e) {
 
 	}
 
+	@Override
 	public void windowClosing(WindowEvent e) {
 		if (chartFrame != null) {
 			chartFrame.setVisible(false);
@@ -254,25 +265,30 @@ public class SearchPanel extends JFrame implements DocumentListener, ListSelecti
 
 	}
 
+	@Override
 	public void windowClosed(WindowEvent e) {
 
 	}
 
+	@Override
 	public void windowIconified(WindowEvent e) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public void windowDeiconified(WindowEvent e) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e) {
 		// TODO Auto-generated method stub
 

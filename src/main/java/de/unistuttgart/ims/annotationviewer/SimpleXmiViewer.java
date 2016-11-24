@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
@@ -42,6 +43,8 @@ import org.apache.commons.configuration2.tree.OverrideCombiner;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
@@ -74,7 +77,11 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 	Set<URI> typeSystemLocations = new HashSet<URI>();
 	TypeSystemDescription typeSystemDescription = null;
 
+	static final Logger logger = LogManager.getLogger(SimpleXmiViewer.class);
+
 	public SimpleXmiViewer(String[] args) {
+		logger.info("Application startup");
+
 		preferences = Preferences.userRoot().node(XmiDocumentWindow.class.getName());
 
 		INIConfiguration defaultConfig = new INIConfiguration();
@@ -89,23 +96,25 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 				// defaults.load();
 			}
 		} catch (Exception e) {
+			logger.warn("Could not read default configuration.");
 			e.printStackTrace();
 		} finally {
 			IOUtils.closeQuietly(is);
 		}
 
+		File userConfigFile = null;
 		try {
 			File homeDirectory = new File(System.getProperty("user.home"));
-			File userConfigFile = new File(homeDirectory, ".SimpleXmiViewer.ini");
+			userConfigFile = new File(homeDirectory, ".SimpleXmiViewer.ini");
 			if (userConfigFile.exists())
 				userConfig.read(new FileReader(userConfigFile));
 			else
 				userConfigFile.createNewFile();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (ConfigurationException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (ConfigurationException | IOException e) {
+			logger.warn("Could not read or parse user configuration in file {}. Exception: {}.", userConfigFile,
+					e.getMessage());
 			e.printStackTrace();
 		}
 
@@ -114,10 +123,11 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		config.addConfiguration(defaultConfig);
 		configuration = config;
 
-		/*
-		 * Iterator<String> it = config.getKeys(); while (it.hasNext()) {
-		 * System.err.println(it.next()); }
-		 */
+		Iterator<String> it = config.getKeys();
+		while (it.hasNext()) {
+			String key = it.next();
+			logger.debug("Config: {} = {}.", key, config.getString(key));
+		}
 
 		aboutDialog = new AboutDialog(null, "About Annotation Viewer");
 
@@ -162,6 +172,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 
 	public void loadTypeSystem(URI file) throws ResourceInitializationException {
 
+		logger.debug("Loading a typesystem from {}.", file);
 		if (typeSystemDescription == null)
 			typeSystemDescription = TypeSystemDescriptionFactory.createTypeSystemDescriptionFromPath(file.toString());
 		else
@@ -176,18 +187,17 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 
 	public synchronized void savePreferences() {
 		try {
+			logger.debug("Saving preferences.");
 			@SuppressWarnings("unchecked")
 			INIConfiguration icfg = new INIConfiguration((HierarchicalConfiguration<ImmutableNode>) getConfiguration());
 			Writer w = new FileWriter(new File(new File(System.getProperty("user.home")), ".SimpleXmiViewer.ini"));
 			icfg.write(w);
 			w.flush();
 			w.close();
-		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
+			logger.debug("Saving preferences successful.");
+		} catch (ConfigurationException | IOException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Preferences could not be saved: {}.", e.getMessage());
 		}
 	}
 
@@ -211,6 +221,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 				item.setSelected(true);
 			} else
 				item.addActionListener(new ActionListener() {
+					@Override
 					public void actionPerformed(ActionEvent e) {
 						v.toFront();
 					}
@@ -242,6 +253,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			@Override
 			public void run() {
 				try {
+					logger.info("Loading XMI document from {}.", url);
 					v.loadFile(url.openStream(), typeSystemDescription, null);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -269,6 +281,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			@Override
 			public void run() {
 				try {
+					logger.info("Loading XMI document from {}.", file);
 					v.loadFile(new FileInputStream(file), typeSystemDescription, file.getName());
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
@@ -283,14 +296,17 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		return v;
 	}
 
+	@Override
 	public void handleAbout(AboutEvent e) {
 		aboutDialog.setVisible(true);
 	}
 
+	@Override
 	public void handlePreferences(PreferencesEvent e) {
 		prefDialog.setVisible(true);
 	}
 
+	@Override
 	public void openFiles(OpenFilesEvent e) {
 		for (Object file : e.getFiles()) {
 			if (file instanceof File) {
@@ -304,6 +320,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			v.windowsMenu(openFiles);
 	}
 
+	@Override
 	public void handleQuitRequestWith(QuitEvent e, QuitResponse response) {
 		for (XmiDocumentWindow v : openFiles)
 			this.close(v);
@@ -357,6 +374,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			putValue(Action.NAME, "Open URL");
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			mainApplication.urlOpenDialog();
 		}
@@ -372,6 +390,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			String s = (String) JOptionPane.showInputDialog(null, "URL:\n", "Load type system by URI",
 					JOptionPane.PLAIN_MESSAGE, null, null, "");
@@ -400,6 +419,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 					KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			mainApplication.fileOpenDialog();
 		}
