@@ -28,8 +28,10 @@ import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 
@@ -50,6 +52,7 @@ import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.apache.uima.tools.util.gui.AboutDialog;
 import org.apache.uima.util.CasCreationUtils;
+import org.apache.uima.util.FileUtils;
 
 import com.apple.eawt.AboutHandler;
 import com.apple.eawt.AppEvent.AboutEvent;
@@ -63,6 +66,7 @@ import com.apple.eawt.QuitHandler;
 import com.apple.eawt.QuitResponse;
 
 public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFilesHandler, QuitHandler {
+
 	Set<XmiDocumentWindow> openFiles = new HashSet<XmiDocumentWindow>();
 
 	Preferences preferences;
@@ -422,6 +426,35 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			mainApplication.fileOpenDialog();
+		}
+
+	}
+
+	static class ShowLogAction extends XmiViewerAction {
+
+		private static final long serialVersionUID = 1L;
+
+		public ShowLogAction(SimpleXmiViewer mApplication) {
+			super(mApplication);
+			putValue(Action.NAME, "Show log window");
+			putValue(Action.ACCELERATOR_KEY,
+					KeyStroke.getKeyStroke(KeyEvent.VK_L, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JFrame logWindow = new JFrame("SimpleXmiViewer - Log");
+			JTextArea textArea = new JTextArea();
+			try {
+				String log = FileUtils.file2String(new File(System.getenv("user.home"), ".SimpleXmiViewer.log"));
+				textArea.setText(log);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			logWindow.setContentPane(textArea);
+			logWindow.pack();
+			logWindow.setVisible(true);
 		}
 
 	}
