@@ -106,6 +106,7 @@ public class SearchPanel extends JFrame implements DocumentListener, ListSelecti
 			Pattern.compile(textField.getText());
 			search(textField.getText());
 		} catch (PatternSyntaxException ex) {
+			SimpleXmiViewer.logger.trace(ex.getMessage());
 		}
 	}
 
@@ -115,6 +116,7 @@ public class SearchPanel extends JFrame implements DocumentListener, ListSelecti
 			Pattern.compile(textField.getText());
 			search(textField.getText());
 		} catch (PatternSyntaxException ex) {
+			SimpleXmiViewer.logger.trace(ex.getMessage());
 		}
 	}
 
@@ -124,6 +126,7 @@ public class SearchPanel extends JFrame implements DocumentListener, ListSelecti
 			Pattern.compile(textField.getText());
 			search(textField.getText());
 		} catch (PatternSyntaxException ex) {
+			SimpleXmiViewer.logger.trace(ex.getMessage());
 		}
 	}
 
