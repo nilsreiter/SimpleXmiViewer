@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Simplexmiviewer by nilsreiter</title>
+    <title>SimpleXmiViewer by nilsreiter</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/github-light.css">
@@ -15,35 +15,58 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1>Simplexmiviewer</h1>
-        <p>a simple viewer for xmi files</p>
+        <h1>SimpleXmiViewer</h1>
+        <p>A simple Viewer for XMI files</p>
 
         <p class="view"><a href="https://github.com/nilsreiter/SimpleXmiViewer">View the Project on GitHub <small>nilsreiter/SimpleXmiViewer</small></a></p>
 
-
         <ul>
+          <li><a href="https://github.com/nilsreiter/SimpleXmiViewer/releases">Latest <strong>Releases</strong></a></li>
           <li><a href="https://github.com/nilsreiter/SimpleXmiViewer/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/nilsreiter/SimpleXmiViewer/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/nilsreiter/SimpleXmiViewer">View On <strong>GitHub</strong></a></li>
         </ul>
       </header>
       <section>
         <h1>
 <a id="simple-xmi-annotation-viewer" class="anchor" href="#simple-xmi-annotation-viewer" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Simple XMI annotation viewer</h1>
 
-<p>This package provides a very simple viewer for XMI files. The app assumes that the typesystem is available as an XML file called typesystem.xml in the same directory (this is what dkpro XmiWriter prints anyway).</p>
+<p>This package provides a very simple viewer for XMI files, which is an extension and re-packaging of the <a href="https://uima.apache.org/d/uimaj-current/tools.html#ugr.tools.annotation_viewer">UIMA Annotation Viewer</a>. On Mac OS X, it nicely integrates with Finder.app, allowing to open and inspect XMI files with a double click or <code>open</code> on the command line. </p>
+
+<img src="images/screenshot-1.png" />
+
+<p>Search capabailities are included as well. </p>
+
+<img src="images/screenshot-2.png" />
+
+<p>Multiple windows</p>
+
+<img src="images/screenshot-3.png" />
+
 
 <h2>
 <a id="compile-and-package" class="anchor" href="#compile-and-package" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Compile and package</h2>
 
 <div class="highlight highlight-source-shell"><pre>mvn package</pre></div>
+
+<p>This gives you a file called <code>SimpleXmiViewer-VERSION-full.jar</code> in the target directory, which is a runnable jar file, containing all dependencies. Double click that file or run </p>
+
+<div class="highlight highlight-source-shell"><pre>java -jar target/SimpleXmiViewer-VERSION-full.jar</pre></div>
+
+<p>to launch the viewer. Initially, the viewer displays a file open dialog.</p>
+
+<h2>
+<a id="issues-and-questions" class="anchor" href="#issues-and-questions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Issues and questions</h2>
+<p>Feel free to either open an <a href="https://github.com/nilsreiter/SimpleXmiViewer/issues">issue on github</a> or drop me a line if there are any issues or questions.</p>
       </section>
+
+
+
+
       <footer>
         <p>This project is maintained by <a href="https://github.com/nilsreiter">nilsreiter</a></p>
         <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>
-    
+
   </body>
 </html>
