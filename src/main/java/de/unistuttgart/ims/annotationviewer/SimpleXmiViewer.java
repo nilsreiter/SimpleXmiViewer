@@ -1,5 +1,7 @@
 package de.unistuttgart.ims.annotationviewer;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,8 +33,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.filechooser.FileFilter;
 
 import org.apache.commons.configuration2.CombinedConfiguration;
@@ -446,8 +450,13 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		public void actionPerformed(ActionEvent e) {
 			JFrame logWindow = new JFrame("SimpleXmiViewer - Log");
 			JTextArea textArea = new JTextArea();
+			Dimension d = new Dimension(java.awt.Toolkit.getDefaultToolkit().getScreenSize());
+			d.height -= 100;
+			textArea.setMaximumSize(d);
+			JScrollPane scroll = new JScrollPane(textArea);
+			scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 			try {
-				File logFile = new File(System.getenv("user.home"), ".SimpleXmiViewer.log");
+				File logFile = new File(System.getProperty("user.home"), ".SimpleXmiViewer.log");
 				if (logFile.exists() && logFile.canRead()) {
 					String log = FileUtils.file2String(logFile);
 					textArea.setText(log);
@@ -456,7 +465,8 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 				e1.printStackTrace();
 			}
 			textArea.setEditable(false);
-			logWindow.setContentPane(textArea);
+
+			logWindow.add(scroll, BorderLayout.CENTER);
 			logWindow.pack();
 			logWindow.setVisible(true);
 		}
