@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -31,6 +30,7 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.Logger;
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
@@ -76,7 +76,7 @@ public class XmiDocumentWindow extends JFrame {
 		this.showTreeView = showTreeView;
 	}
 
-	static Logger logger = Logger.getAnonymousLogger();
+	static Logger logger = SimpleXmiViewer.logger;
 
 	private JMenuBar menuBar = new JMenuBar();
 
@@ -99,7 +99,7 @@ public class XmiDocumentWindow extends JFrame {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
-			logger.severe("Could not set look and feel: " + e.getMessage());
+			logger.error("Could not set look and feel {}.", e.getMessage());
 		}
 
 		// top level menus
@@ -126,13 +126,15 @@ public class XmiDocumentWindow extends JFrame {
 		fileMenu.add(new SimpleXmiViewer.FileOpenURLAction(mainApplication));
 		fileMenu.add(recentMenu);
 		fileMenu.addSeparator();
-		fileMenu.add(new SimpleXmiViewer.LoadTypeSystemAction());
+		fileMenu.add(new SimpleXmiViewer.LoadTypeSystemAction(mainApplication));
 		fileMenu.addSeparator();
 		fileMenu.add(closeMenuItem);
 		fileMenu.addSeparator();
 		fileMenu.add(exitMenuItem);
 		viewMenu.add(new ViewFontSizeDecreaseAction());
 		viewMenu.add(new ViewFontSizeIncreaseAction());
+		viewMenu.addSeparator();
+		viewMenu.add(new SimpleXmiViewer.ShowLogAction(mainApplication));
 
 		helpMenu.add(aboutMenuItem);
 		helpMenu.add(helpMenuItem);
@@ -159,6 +161,7 @@ public class XmiDocumentWindow extends JFrame {
 
 		// Event Handlling of "Quit" Menu Item
 		exitMenuItem.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent ae) {
 				mainApplication.handleQuitRequestWith(new QuitEvent(), new QuitResponse());
 			}
@@ -166,6 +169,7 @@ public class XmiDocumentWindow extends JFrame {
 
 		// Event Handlling of "Close" Menu Item
 		closeMenuItem.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent ae) {
 				// savePreferences();
 				closeWindow(false);
@@ -174,6 +178,7 @@ public class XmiDocumentWindow extends JFrame {
 
 		// Event Handlling of "About" Menu Item
 		aboutMenuItem.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent ae) {
 				mainApplication.handleAbout(new AboutEvent());
 			}
@@ -181,6 +186,7 @@ public class XmiDocumentWindow extends JFrame {
 
 		// Event Handlling of "Help" Menu Item
 		helpMenuItem.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent ae) {
 				JOptionPane.showMessageDialog(XmiDocumentWindow.this, HELP_MESSAGE, "Annotation Viewer Help",
 						JOptionPane.PLAIN_MESSAGE);
@@ -198,6 +204,7 @@ public class XmiDocumentWindow extends JFrame {
 			JMenuItem mi = new JMenuItem(f.getName());
 			mi.addActionListener(new ActionListener() {
 
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					mainApplication.open(f);
 				}
@@ -214,6 +221,7 @@ public class XmiDocumentWindow extends JFrame {
 			} else
 				item.addActionListener(new ActionListener() {
 
+					@Override
 					public void actionPerformed(ActionEvent e) {
 						v.toFront();
 					}
@@ -303,6 +311,7 @@ public class XmiDocumentWindow extends JFrame {
 
 				mItem.addActionListener(new ActionListener() {
 
+					@Override
 					public void actionPerformed(ActionEvent e) {
 						XmiDocumentWindow.this.viewer.getTextPane().setCaretPosition(anno.getBegin());
 					}
@@ -327,6 +336,7 @@ public class XmiDocumentWindow extends JFrame {
 					KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			new SearchPanel(XmiDocumentWindow.this, mainApplication.getConfiguration()).setVisible(true);
 		}
@@ -344,6 +354,7 @@ public class XmiDocumentWindow extends JFrame {
 					KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			int oldSize = XmiDocumentWindow.this.viewer.getTextPane().getFont().getSize();
 			XmiDocumentWindow.this.viewer.getTextPane().setFont(new Font(Font.SANS_SERIF, Font.PLAIN, oldSize + 1));
@@ -363,6 +374,7 @@ public class XmiDocumentWindow extends JFrame {
 					KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			int oldSize = XmiDocumentWindow.this.viewer.getTextPane().getFont().getSize();
 			XmiDocumentWindow.this.viewer.getTextPane().setFont(new Font(Font.SANS_SERIF, Font.PLAIN, oldSize - 1));
