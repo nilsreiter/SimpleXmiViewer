@@ -447,11 +447,15 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			JFrame logWindow = new JFrame("SimpleXmiViewer - Log");
 			JTextArea textArea = new JTextArea();
 			try {
-				String log = FileUtils.file2String(new File(System.getenv("user.home"), ".SimpleXmiViewer.log"));
-				textArea.setText(log);
+				File logFile = new File(System.getenv("user.home"), ".SimpleXmiViewer.log");
+				if (logFile.exists() && logFile.canRead()) {
+					String log = FileUtils.file2String(logFile);
+					textArea.setText(log);
+				}
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
+			textArea.setEditable(false);
 			logWindow.setContentPane(textArea);
 			logWindow.pack();
 			logWindow.setVisible(true);
