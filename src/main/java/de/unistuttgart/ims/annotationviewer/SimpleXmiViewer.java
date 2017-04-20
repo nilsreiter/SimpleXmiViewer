@@ -293,6 +293,8 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 					logger.info("Loading XMI document from {}.", file);
 					v.loadFile(new FileInputStream(file), typeSystemDescription, file.getName());
 				} catch (FileNotFoundException e) {
+					logger.warn("File {} not found.", file);
+					warnDialog("File " + file.getAbsolutePath() + " could not be found.", "File not found");
 					e.printStackTrace();
 				}
 			}
@@ -472,5 +474,9 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			logWindow.setVisible(true);
 		}
 
+	}
+
+	public void warnDialog(String message, String title) {
+		JOptionPane.showMessageDialog(null, message, title, JOptionPane.WARNING_MESSAGE);
 	}
 }
