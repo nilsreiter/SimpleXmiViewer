@@ -159,10 +159,8 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		for (Object s : configuration.getList("General.typeSystems", new ArrayList<Object>())) {
 			try {
 				loadTypeSystem(new URI(s.toString()));
-			} catch (ResourceInitializationException e) {
+			} catch (Exception e) {
 				logger.warn("Exception {} when loading type system from {}", e.getMessage(), s.toString());
-				e.printStackTrace();
-			} catch (URISyntaxException e) {
 				e.printStackTrace();
 			}
 		}
