@@ -54,7 +54,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
-import org.apache.uima.tools.util.gui.AboutDialog;
 import org.apache.uima.util.CasCreationUtils;
 import org.apache.uima.util.FileUtils;
 
