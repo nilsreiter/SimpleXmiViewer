@@ -28,7 +28,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.uima.UIMAException;
@@ -107,6 +110,7 @@ public class XmiDocumentWindow extends JFrame {
 		JMenu helpMenu = new JMenu("Help");
 		JMenu viewMenu = new JMenu("View");
 		JMenu toolsMenu = new JMenu("Tools");
+		JMenu debugMenu = new JMenu("Debug");
 		windowsMenu = new JMenu("Windows");
 		if (segmentAnnotation != null) {
 			documentMenu = new JMenu("Document");
@@ -139,7 +143,11 @@ public class XmiDocumentWindow extends JFrame {
 		helpMenu.add(aboutMenuItem);
 		helpMenu.add(helpMenuItem);
 
+		debugMenu.add(new JMenuItem(new ShowEVDialogAction()));
+		debugMenu.add(new JMenuItem(new ShowConfigurationDialogAction()));
+
 		toolsMenu.add(new ShowSearchPanelAction());
+		toolsMenu.add(debugMenu);
 
 		menuBar.add(fileMenu);
 		menuBar.add(viewMenu);
@@ -341,6 +349,51 @@ public class XmiDocumentWindow extends JFrame {
 			new SearchPanel(XmiDocumentWindow.this, mainApplication.getConfiguration()).setVisible(true);
 		}
 
+	}
+
+	class ShowEVDialogAction extends AbstractAction {
+		private static final long serialVersionUID = 1L;
+		private static final String title = "System Properties";
+
+		public ShowEVDialogAction() {
+			super();
+			putValue(Action.NAME, title);
+			putValue(Action.ACCELERATOR_KEY,
+					KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			TableModel tm = new DefaultTableModel(
+					new Object[][] { new Object[] { "user.home", System.getProperty("user.home", "NULL") } },
+					new Object[] { "Variable", "Value" });
+			new TableDialog(XmiDocumentWindow.this, tm, title).setVisible(true);
+		}
+	}
+
+	class ShowConfigurationDialogAction extends AbstractAction {
+		private static final long serialVersionUID = 1L;
+		private static final String title = "Configuration Settings";
+
+		public ShowConfigurationDialogAction() {
+			super();
+			putValue(Action.NAME, title);
+			putValue(Action.ACCELERATOR_KEY,
+					KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			Iterator<String> keyIter = mainApplication.getConfiguration().getKeys();
+			Object[][] data = new Object[0][];
+			while (keyIter.hasNext()) {
+				String key = keyIter.next();
+				data = (Object[][]) ArrayUtils.add(data,
+						new Object[] { key, mainApplication.getConfiguration().get(String.class, key, null) });
+			}
+			TableModel tm = new DefaultTableModel(data, new Object[] { "Key", "Value" });
+			new TableDialog(XmiDocumentWindow.this, tm, title).setVisible(true);
+		}
 	}
 
 	class ViewFontSizeIncreaseAction extends AbstractAction {
