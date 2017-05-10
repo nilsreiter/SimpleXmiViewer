@@ -54,7 +54,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
-import org.apache.uima.tools.util.gui.AboutDialog;
 import org.apache.uima.util.CasCreationUtils;
 import org.apache.uima.util.FileUtils;
 
@@ -156,13 +155,20 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			}
 		});
 
+		// Load type system(s)
+
+		if (configuration.getBoolean("General.loadIncludedTypeSystems", true))
+			try {
+				loadIncludedTypeSystems();
+			} catch (ResourceInitializationException e1) {
+				e1.printStackTrace();
+			}
+
 		for (Object s : configuration.getList("General.typeSystems", new ArrayList<Object>())) {
 			try {
 				loadTypeSystem(new URI(s.toString()));
-			} catch (ResourceInitializationException e) {
+			} catch (Exception e) {
 				logger.warn("Exception {} when loading type system from {}", e.getMessage(), s.toString());
-				e.printStackTrace();
-			} catch (URISyntaxException e) {
 				e.printStackTrace();
 			}
 		}
@@ -177,6 +183,10 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			open(new File(args[0]));
 		} else if (openFiles.isEmpty())
 			this.fileOpenDialog();
+	}
+
+	public void loadIncludedTypeSystems() throws ResourceInitializationException {
+		typeSystemDescription = TypeSystemDescriptionFactory.createTypeSystemDescription();
 	}
 
 	public void loadTypeSystem(URI file) throws ResourceInitializationException {
@@ -293,6 +303,8 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 					logger.info("Loading XMI document from {}.", file);
 					v.loadFile(new FileInputStream(file), typeSystemDescription, file.getName());
 				} catch (FileNotFoundException e) {
+					logger.warn("File {} not found.", file);
+					warnDialog("File " + file.getAbsolutePath() + " could not be found.", "File not found");
 					e.printStackTrace();
 				}
 			}
@@ -472,5 +484,9 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			logWindow.setVisible(true);
 		}
 
+	}
+
+	public void warnDialog(String message, String title) {
+		JOptionPane.showMessageDialog(null, message, title, JOptionPane.WARNING_MESSAGE);
 	}
 }
