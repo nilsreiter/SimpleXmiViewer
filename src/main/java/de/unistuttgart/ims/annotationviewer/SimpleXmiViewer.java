@@ -156,6 +156,15 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			}
 		});
 
+		// Load type system(s)
+
+		if (configuration.getBoolean("General.loadIncludedTypeSystems", true))
+			try {
+				loadIncludedTypeSystems();
+			} catch (ResourceInitializationException e1) {
+				e1.printStackTrace();
+			}
+
 		for (Object s : configuration.getList("General.typeSystems", new ArrayList<Object>())) {
 			try {
 				loadTypeSystem(new URI(s.toString()));
@@ -175,6 +184,10 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			open(new File(args[0]));
 		} else if (openFiles.isEmpty())
 			this.fileOpenDialog();
+	}
+
+	public void loadIncludedTypeSystems() throws ResourceInitializationException {
+		typeSystemDescription = TypeSystemDescriptionFactory.createTypeSystemDescription();
 	}
 
 	public void loadTypeSystem(URI file) throws ResourceInitializationException {
