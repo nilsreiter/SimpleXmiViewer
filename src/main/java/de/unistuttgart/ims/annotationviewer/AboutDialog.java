@@ -28,8 +28,10 @@ public class AboutDialog extends JDialog {
 		JButton closeButton = new JButton("OK");
 
 		String aboutText = ABOUT_TEXT.replaceAll("\\$\\{uima.version\\}", UIMAFramework.getVersionString());
-		aboutText = aboutText.replaceAll("\\$\\{sxv.version\\}", getClass().getPackage().getImplementationVersion());
 
+		if (getClass().getPackage().getImplementationVersion() != null)
+			aboutText = aboutText.replaceAll("\\$\\{sxv.version\\}",
+					getClass().getPackage().getImplementationVersion());
 		JTextArea textArea = new JTextArea(aboutText);
 		textArea.setEditable(false);
 		getContentPane().add(textArea, BorderLayout.CENTER);
