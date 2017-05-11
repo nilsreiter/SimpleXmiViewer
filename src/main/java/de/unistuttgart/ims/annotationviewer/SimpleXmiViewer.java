@@ -294,7 +294,8 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 				try {
 					loadTypeSystem(tsdFile.toURI());
 				} catch (ResourceInitializationException e) {
-					e.printStackTrace();
+					logger.error("Type system could not be loaded from file {}. Error: {}.", tsdFile.getAbsolutePath(),
+							e.getMessage());
 					return null;
 				}
 		}
