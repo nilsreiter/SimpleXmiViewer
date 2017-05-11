@@ -112,6 +112,8 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		File userConfigFile = null;
 		try {
 			File homeDirectory = new File(System.getProperty("user.home"));
+			logger.debug("user.home: {}", homeDirectory.getAbsolutePath());
+			logger.debug("user.home (URI): {}", homeDirectory.toURI().toString());
 			userConfigFile = new File(homeDirectory, ".SimpleXmiViewer.ini");
 			if (userConfigFile.exists())
 				userConfig.read(new FileReader(userConfigFile));
