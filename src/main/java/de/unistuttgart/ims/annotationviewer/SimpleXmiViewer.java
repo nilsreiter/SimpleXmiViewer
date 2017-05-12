@@ -6,6 +6,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -56,6 +57,7 @@ import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.apache.uima.util.CasCreationUtils;
 import org.apache.uima.util.FileUtils;
+import org.xml.sax.SAXException;
 
 import com.apple.eawt.AboutHandler;
 import com.apple.eawt.AppEvent.AboutEvent;
@@ -446,6 +448,43 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			mainApplication.fileOpenDialog();
+		}
+
+	}
+
+	static class ShowTypeSystemAction extends XmiViewerAction {
+		private static final long serialVersionUID = 1L;
+		SimpleXmiViewer mainApplication;
+
+		public ShowTypeSystemAction(SimpleXmiViewer mApplication) {
+			super(mApplication);
+			mainApplication = mApplication;
+			putValue(Action.NAME, "Show typesystem description");
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JFrame logWindow = new JFrame("SimpleXmiViewer - Log");
+			JTextArea textArea = new JTextArea();
+			Dimension d = new Dimension(java.awt.Toolkit.getDefaultToolkit().getScreenSize());
+			d.height -= 100;
+			textArea.setMaximumSize(d);
+			JScrollPane scroll = new JScrollPane(textArea);
+			scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+			try {
+				ByteArrayOutputStream boas = new ByteArrayOutputStream();
+				mainApplication.typeSystemDescription.toXML(boas);
+
+				textArea.setText(boas.toString("UTF-8"));
+			} catch (IOException | SAXException e1) {
+				logger.warn(e1.getMessage());
+				e1.printStackTrace();
+			}
+			textArea.setEditable(false);
+
+			logWindow.add(scroll, BorderLayout.CENTER);
+			logWindow.pack();
+			logWindow.setVisible(true);
 		}
 
 	}

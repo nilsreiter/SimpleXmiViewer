@@ -144,6 +144,7 @@ public class XmiDocumentWindow extends JFrame {
 		debugMenu.add(new JMenuItem(new ShowEVDialogAction()));
 		debugMenu.add(new JMenuItem(new ShowConfigurationDialogAction()));
 		debugMenu.add(new JMenuItem(new SimpleXmiViewer.ShowLogAction(mainApplication)));
+		debugMenu.add(new JMenuItem(new SimpleXmiViewer.ShowTypeSystemAction(mainApplication)));
 
 		toolsMenu.add(new ShowSearchPanelAction());
 		toolsMenu.add(debugMenu);
