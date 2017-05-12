@@ -29,9 +29,20 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.4</version>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.0.0</version>
 				<configuration>
+					<transformers>
+                    	<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                        	<resource>META-INF/org.apache.uima.fit/types.txt</resource>
+                        </transformer>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                 			<manifestEntries>
+                    			<Main-Class>de.unistuttgart.ims.annotationviewer.SimpleXmiViewer</Main-Class>
+                    			<Build-Number>${project.version}</Build-Number>
+                  			</manifestEntries>
+                		</transformer>
+                    </transformers>
 					<finalName>${project.name}-${project.version}-full</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
 					<descriptorRefs>
@@ -50,7 +61,7 @@
 					<execution>
 						<phase>package</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>shade</goal>
 						</goals>
 					</execution>
 				</executions>
