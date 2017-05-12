@@ -245,15 +245,21 @@ public class XmiDocumentWindow extends JFrame {
 		try {
 			jcas = JCasFactory.createJCas(typeSystemDescription);
 		} catch (UIMAException e1) {
+			logger.error(e1.getMessage());
 			e1.printStackTrace();
 			System.exit(1);
 		}
 		try {
+			logger.info("Deserialising input stream.");
 			XmiCasDeserializer.deserialize(inputStream, jcas.getCas(), true);
 		} catch (SAXException e1) {
+			logger.error(e1.getMessage());
+
 			e1.printStackTrace();
 			System.exit(1);
 		} catch (IOException e1) {
+			logger.error(e1.getMessage());
+
 			e1.printStackTrace();
 			System.exit(1);
 		}
@@ -272,7 +278,7 @@ public class XmiDocumentWindow extends JFrame {
 			else
 				setTitle((windowTitle != null ? " (" + windowTitle + ")" : ""));
 		} catch (CASRuntimeException e) {
-
+			logger.error(e.getMessage());
 		}
 		// assembly of the main view
 		viewer = new MyCASAnnotationViewer();
