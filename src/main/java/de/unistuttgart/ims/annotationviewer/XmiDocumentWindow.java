@@ -137,8 +137,6 @@ public class XmiDocumentWindow extends JFrame {
 		fileMenu.add(exitMenuItem);
 		viewMenu.add(new ViewFontSizeDecreaseAction());
 		viewMenu.add(new ViewFontSizeIncreaseAction());
-		viewMenu.addSeparator();
-		viewMenu.add(new SimpleXmiViewer.ShowLogAction(mainApplication));
 
 		helpMenu.add(aboutMenuItem);
 		helpMenu.add(helpMenuItem);
@@ -146,6 +144,7 @@ public class XmiDocumentWindow extends JFrame {
 		debugMenu.add(new JMenuItem(new ShowEVDialogAction()));
 		debugMenu.add(new JMenuItem(new ShowConfigurationDialogAction()));
 		debugMenu.add(new JMenuItem(new SimpleXmiViewer.ShowLogAction(mainApplication)));
+		debugMenu.add(new JMenuItem(new SimpleXmiViewer.ShowTypeSystemAction(mainApplication)));
 
 		toolsMenu.add(new ShowSearchPanelAction());
 		toolsMenu.add(debugMenu);
@@ -247,15 +246,21 @@ public class XmiDocumentWindow extends JFrame {
 		try {
 			jcas = JCasFactory.createJCas(typeSystemDescription);
 		} catch (UIMAException e1) {
+			logger.error(e1.getMessage());
 			e1.printStackTrace();
 			System.exit(1);
 		}
 		try {
+			logger.info("Deserialising input stream.");
 			XmiCasDeserializer.deserialize(inputStream, jcas.getCas(), true);
 		} catch (SAXException e1) {
+			logger.error(e1.getMessage());
+
 			e1.printStackTrace();
 			System.exit(1);
 		} catch (IOException e1) {
+			logger.error(e1.getMessage());
+
 			e1.printStackTrace();
 			System.exit(1);
 		}
@@ -274,7 +279,7 @@ public class XmiDocumentWindow extends JFrame {
 			else
 				setTitle((windowTitle != null ? " (" + windowTitle + ")" : ""));
 		} catch (CASRuntimeException e) {
-
+			logger.error(e.getMessage());
 		}
 		// assembly of the main view
 		viewer = new MyCASAnnotationViewer();
