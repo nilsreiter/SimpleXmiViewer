@@ -68,6 +68,7 @@ public class XmiDocumentWindow extends JFrame {
 	JMenu documentMenu;
 	JMenu recentMenu;
 	JMenu windowsMenu;
+	JCas jcas = null;
 
 	boolean showTreeView = false;
 
@@ -147,6 +148,7 @@ public class XmiDocumentWindow extends JFrame {
 		debugMenu.add(new JMenuItem(new SimpleXmiViewer.ShowTypeSystemAction(mainApplication)));
 
 		toolsMenu.add(new ShowSearchPanelAction());
+		toolsMenu.add(new ShowNonAnnotationsPanelAction());
 		toolsMenu.add(debugMenu);
 
 		menuBar.add(fileMenu);
@@ -242,7 +244,6 @@ public class XmiDocumentWindow extends JFrame {
 	public void loadFile(InputStream inputStream, TypeSystemDescription typeSystemDescription, String windowTitle) {
 		// load type system and CAS
 		CAS cas = null;
-		JCas jcas = null;
 		try {
 			jcas = JCasFactory.createJCas(typeSystemDescription);
 		} catch (UIMAException e1) {
@@ -357,6 +358,24 @@ public class XmiDocumentWindow extends JFrame {
 
 	}
 
+	class ShowNonAnnotationsPanelAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+
+		public ShowNonAnnotationsPanelAction() {
+			super();
+			putValue(Action.NAME, "Show Invisible FSs");
+			putValue(Action.ACCELERATOR_KEY,
+					KeyStroke.getKeyStroke(KeyEvent.VK_I, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			new FeatureStructureTree(XmiDocumentWindow.this, mainApplication.getConfiguration()).setVisible(true);
+		}
+
+	}
+
 	class ShowEVDialogAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
 		private static final String title = "System Properties";
@@ -440,5 +459,9 @@ public class XmiDocumentWindow extends JFrame {
 
 		}
 
+	}
+
+	public JCas getJcas() {
+		return jcas;
 	}
 }
