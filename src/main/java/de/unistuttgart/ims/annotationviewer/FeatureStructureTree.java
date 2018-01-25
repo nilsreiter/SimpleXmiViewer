@@ -51,6 +51,8 @@ public class FeatureStructureTree extends JFrame {
 		fsArrayType = typeSystem.getType(CAS.TYPE_NAME_FS_ARRAY);
 		createNodes(top);
 		setSize(400, 800);
+		setLocation(xdw.getLocation().x + xdw.getWidth(), xdw.getLocation().y);
+
 		tree.expandRow(0);
 		pack();
 
