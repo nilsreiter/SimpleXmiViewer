@@ -364,9 +364,9 @@ public class XmiDocumentWindow extends JFrame {
 
 		public ShowNonAnnotationsPanelAction() {
 			super();
-			putValue(Action.NAME, "Show All Feature Structures");
+			putValue(Action.NAME, "Show Invisible FSs");
 			putValue(Action.ACCELERATOR_KEY,
-					KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+					KeyStroke.getKeyStroke(KeyEvent.VK_I, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		}
 
 		@Override
