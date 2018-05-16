@@ -48,10 +48,6 @@ import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.apache.uima.tools.viewer.CasTreeViewer;
 import org.xml.sax.SAXException;
 
-import com.apple.eawt.AppEvent.AboutEvent;
-import com.apple.eawt.AppEvent.QuitEvent;
-import com.apple.eawt.QuitResponse;
-
 public class XmiDocumentWindow extends JFrame {
 
 	private static final String HELP_MESSAGE = "Instructions for using Xmi Viewer";
@@ -173,7 +169,7 @@ public class XmiDocumentWindow extends JFrame {
 		exitMenuItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent ae) {
-				mainApplication.handleQuitRequestWith(new QuitEvent(), new QuitResponse());
+				mainApplication.handleQuitRequestWith();
 			}
 		});
 
@@ -190,7 +186,7 @@ public class XmiDocumentWindow extends JFrame {
 		aboutMenuItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent ae) {
-				mainApplication.handleAbout(new AboutEvent());
+				mainApplication.handleAbout();
 			}
 		});
 
