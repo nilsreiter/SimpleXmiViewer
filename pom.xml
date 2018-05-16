@@ -13,6 +13,65 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
+	<profiles>
+		<profile>
+			<id>release</id>
+			<activation>
+				<property>
+					<name>release</name>
+					<value>release</value>
+				</property>
+			</activation>
+			<properties>
+				<release>release</release>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<id>duplicate build directory</id>
+								<!-- here the phase you need -->
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<copy file="${project.build.directory}"
+										todir="${project.build.directory}/${project.name}" />
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>sh.tak.appbundler</groupId>
+						<artifactId>appbundle-maven-plugin</artifactId>
+						<version>1.2.0</version>
+						<configuration>
+							<mainClass>de.unistuttgart.ims.annotationviewer.SimpleXmiViewer</mainClass>
+							<dictionaryFile>MyInfo.plist</dictionaryFile>
+							<bundleName>${project.name}</bundleName>
+							<buildDirectory>${project.build.directory}/${project.name}</buildDirectory>
+							<generateDiskImageFile>true</generateDiskImageFile>
+							<diskImageFile>${project.name}-${project.version}</diskImageFile>
+							<diskImageInternetEnable>true</diskImageInternetEnable>
+							<includeApplicationsSymlink>true</includeApplicationsSymlink>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>bundle</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<build>
 		<plugins>
 			<plugin>
@@ -63,27 +122,6 @@
 						<phase>package</phase>
 						<goals>
 							<goal>shade</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>sh.tak.appbundler</groupId>
-				<artifactId>appbundle-maven-plugin</artifactId>
-				<version>1.2.0</version>
-				<configuration>
-					<mainClass>de.unistuttgart.ims.annotationviewer.SimpleXmiViewer</mainClass>
-					<dictionaryFile>MyInfo.plist</dictionaryFile>
-					<bundleName>${project.name}</bundleName>
-					<buildDirectory>${project.build.directory}</buildDirectory>
-					<generateDiskImageFile>true</generateDiskImageFile>
-					<diskImageFile>${project.name}-${project.version}</diskImageFile>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>bundle</goal>
 						</goals>
 					</execution>
 				</executions>
