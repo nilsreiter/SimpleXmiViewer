@@ -59,18 +59,7 @@ import org.apache.uima.util.CasCreationUtils;
 import org.apache.uima.util.FileUtils;
 import org.xml.sax.SAXException;
 
-import com.apple.eawt.AboutHandler;
-import com.apple.eawt.AppEvent.AboutEvent;
-import com.apple.eawt.AppEvent.OpenFilesEvent;
-import com.apple.eawt.AppEvent.PreferencesEvent;
-import com.apple.eawt.AppEvent.QuitEvent;
-import com.apple.eawt.Application;
-import com.apple.eawt.OpenFilesHandler;
-import com.apple.eawt.PreferencesHandler;
-import com.apple.eawt.QuitHandler;
-import com.apple.eawt.QuitResponse;
-
-public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFilesHandler, QuitHandler {
+public class SimpleXmiViewer {
 
 	Set<XmiDocumentWindow> openFiles = new HashSet<XmiDocumentWindow>();
 
@@ -177,12 +166,6 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			}
 		}
 
-		if (System.getProperty("os.name").contains("OS X")) {
-			Application a = Application.getApplication();
-			a.setOpenFileHandler(this);
-			a.setAboutHandler(this);
-			a.setPreferencesHandler(this);
-		}
 		if (args.length == 1) {
 			open(new File(args[0]));
 		} else if (openFiles.isEmpty())
@@ -322,23 +305,12 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 		return v;
 	}
 
-	@Override
-	public void handleAbout(AboutEvent e) {
+	public void handleAbout() {
 		aboutDialog.setVisible(true);
 	}
 
-	@Override
-	public void handlePreferences(PreferencesEvent e) {
+	public void handlePreferences() {
 		prefDialog.setVisible(true);
-	}
-
-	@Override
-	public void openFiles(OpenFilesEvent e) {
-		for (Object file : e.getFiles()) {
-			if (file instanceof File) {
-				open((File) file);
-			}
-		}
 	}
 
 	public void updateAllMenus() {
@@ -346,8 +318,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			v.windowsMenu(openFiles);
 	}
 
-	@Override
-	public void handleQuitRequestWith(QuitEvent e, QuitResponse response) {
+	public void handleQuitRequestWith() {
 		for (XmiDocumentWindow v : openFiles)
 			this.close(v);
 		System.exit(0);
@@ -387,7 +358,7 @@ public class SimpleXmiViewer implements AboutHandler, PreferencesHandler, OpenFi
 			break;
 		default:
 			if (openFiles.isEmpty())
-				handleQuitRequestWith(null, null);
+				handleQuitRequestWith();
 		}
 	}
 
